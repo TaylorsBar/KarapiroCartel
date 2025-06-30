@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  @apply bg-black text-white;
+}
+
+/* Custom CSS for seamless image borders and animations */
+.animate-flag-wave {
+  animation: flagWave 3s ease-in-out infinite;
+  transform-style: preserve-3d;
+}
+
+.animate-shimmer-text {
+  background: linear-gradient(90deg, #DAA520, #F7DC6F, #DAA520, #F7DC6F, #DAA520);
+  background-size: 200% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: shimmerText 3s ease-in-out infinite;
+}
+
+/* Seamless image border blending */
+img {
+  border-radius: inherit;
+  transition: all 0.3s ease;
+}
+
+/* Enhanced flag wave animation */
+@keyframes flagWave {
+  0%, 100% { 
+    transform: perspective(400px) rotateY(0deg) rotateX(0deg) scale(1);
+    filter: brightness(1) contrast(1);
+  }
+  25% { 
+    transform: perspective(400px) rotateY(2deg) rotateX(1deg) scale(1.02);
+    filter: brightness(1.1) contrast(1.1);
+  }
+  50% { 
+    transform: perspective(400px) rotateY(0deg) rotateX(2deg) scale(1.05);
+    filter: brightness(1.2) contrast(1.2);
+  }
+  75% { 
+    transform: perspective(400px) rotateY(-2deg) rotateX(1deg) scale(1.02);
+    filter: brightness(1.1) contrast(1.1);
+  }
+}
+
+/* Shimmer text animation */
+@keyframes shimmerText {
+  0%, 100% { 
+    background-position: 0% 50%;
+    text-shadow: 0 0 10px rgba(218, 165, 32, 0.5);
+  }
+  50% { 
+    background-position: 100% 50%;
+    text-shadow: 0 0 20px rgba(247, 220, 111, 0.8), 0 0 30px rgba(218, 165, 32, 0.6);
+  }
+}
+
+/* Global champagne color replacements */
+.text-red-600, .text-red-500 {
+  @apply text-champagne;
+}
+
+.border-red-600 {
+  @apply border-champagne;
+}
+
+.bg-red-600 {
+  @apply bg-champagne;
+}
+
+.from-red-700 {
+  @apply from-champagne-dark;
+}
+
+.to-red-600 {
+  @apply to-champagne;
+}
+
+.shadow-red-600\/20 {
+  box-shadow: 0 10px 15px -3px rgba(218, 165, 32, 0.2), 0 4px 6px -2px rgba(218, 165, 32, 0.1);
+}
+
+.shadow-red-600\/30 {
+  box-shadow: 0 10px 15px -3px rgba(218, 165, 32, 0.3), 0 4px 6px -2px rgba(218, 165, 32, 0.15);
+}
+
+.shadow-red-600\/40 {
+  box-shadow: 0 25px 50px -12px rgba(218, 165, 32, 0.4);
+}
+
+.hover\:border-red-600:hover {
+  @apply hover:border-champagne;
+}
+
+.hover\:bg-red-600:hover {
+  @apply hover:bg-champagne;
+}
+
+.hover\:text-red-500:hover {
+  @apply hover:text-champagne-light;
+}
+
+.focus\:ring-red-600:focus {
+  --tw-ring-color: rgb(218 165 32);
+}
+
+/* Smooth transitions for all elements */
+* {
+  transition: color 0.3s ease, background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
