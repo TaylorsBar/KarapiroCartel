@@ -408,7 +408,7 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
 
         {/* Shopping Cart */}
         <div className="xl:w-1/3">
-          <ShoppingCart
+          <CartComponent
             cart={cart}
             onRemove={removeFromCart}
             onUpdateQuantity={updateQuantity}
@@ -684,7 +684,7 @@ const FiltersPanel: React.FC<{
 };
 
 // Shopping Cart Component
-const ShoppingCart: React.FC<{
+const CartComponent: React.FC<{
   cart: CartItem[];
   onRemove: (partId: string) => void;
   onUpdateQuantity: (partId: string, quantity: number) => void;
