@@ -20,16 +20,18 @@ const Dashboard: React.FC<DashboardProps> = ({ onSectionChange }) => {
               AI-powered diagnostics, blockchain-verified parts, and VIP self-service workshops
             </p>
             <div className="mb-12">
-              {/* Clean Logo Display without Text Overlay */}
-              <div className="relative mx-auto max-w-4xl">
-                <div className="relative w-full h-96 md:h-[500px] group">
+              {/* Full Width Logo Display */}
+              <div className="relative mx-auto">
+                <div className="relative w-full group">
                   <div className="absolute inset-0 bg-gradient-to-r from-champagne/20 via-champagne-light/30 to-champagne/20 rounded-xl blur-xl animate-pulse-slow"></div>
-                  <div className="relative w-full h-full bg-black rounded-xl border-4 border-champagne shadow-2xl shadow-champagne/40 overflow-hidden flex items-center justify-center">
+                  <div className="relative w-full bg-black rounded-xl border-4 border-champagne shadow-2xl shadow-champagne/40 overflow-hidden flex items-center justify-center">
                     <img 
                       src="/generated-image (1).png" 
                       alt="Karapiro Cartel - State Highway Speed Shop" 
-                      className="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105 filter drop-shadow-lg animate-flag-wave"
+                      className="w-full object-contain transition-transform duration-700 group-hover:scale-105 filter drop-shadow-lg animate-flag-wave"
                       style={{
+                        maxHeight: "500px",
+                        objectFit: "contain",
                         maskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)',
                         WebkitMaskImage: 'linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%)'
                       }}
