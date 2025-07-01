@@ -245,172 +245,197 @@ const Diagnostics: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center text-red-600 uppercase tracking-wider mb-12 relative">
-        AI-Powered Vehicle Diagnostics
-        <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-red-700 to-red-500"></span>
-      </h1>
-      
-      <div className="flex mb-6 border-b border-zinc-800">
-        <button
-          className={`px-4 py-3 font-medium ${activeTab === 'scan' ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('scan')}
-        >
-          Diagnostic Scan
-        </button>
-        <button
-          className={`px-4 py-3 font-medium ${activeTab === 'codes' ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('codes')}
-        >
-          Common Codes
-        </button>
-        <button
-          className={`px-4 py-3 font-medium ${activeTab === 'symptoms' ? 'text-red-600 border-b-2 border-red-600' : 'text-gray-400 hover:text-white'}`}
-          onClick={() => setActiveTab('symptoms')}
-        >
-          Symptom Checker
-        </button>
+    <div className="min-h-screen animated-bg relative overflow-hidden">
+      <div className="particles">
+        {[...Array(12)].map((_, i) => (
+          <div 
+            key={i} 
+            className="particle" 
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${8 + Math.random() * 4}s`
+            }}
+          />
+        ))}
       </div>
-      
-      {activeTab === 'scan' && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <div className="bg-gradient-to-br from-zinc-900 to-black border-2 border-red-600 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Car className="mr-2 text-red-600" />
-              Vehicle Diagnostic Scan
-            </h2>
-            
-            <form onSubmit={handleScan} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Vehicle Make</label>
-                <select
-                  value={vehicleMake}
-                  onChange={(e) => {
-                    setVehicleMake(e.target.value);
-                    setVehicleModel(''); // Reset model when make changes
-                  }}
-                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-                  required
-                >
-                  <option value="">Select Vehicle Make</option>
-                  {popularMakes.map(make => (
-                    <option key={make} value={make}>{make}</option>
-                  ))}
-                </select>
-              </div>
 
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Vehicle Model</label>
-                <select
-                  value={vehicleModel}
-                  onChange={(e) => setVehicleModel(e.target.value)}
-                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-                  disabled={!vehicleMake}
-                  required
-                >
-                  <option value="">Select Vehicle Model</option>
-                  {vehicleMake && commonModels[vehicleMake]?.map(model => (
-                    <option key={model} value={model}>{model}</option>
-                  ))}
-                </select>
-              </div>
+      <div className="container mx-auto px-4 py-8 relative depth-2">
+        <h1 className="text-4xl font-bold text-center text-luxury uppercase tracking-wider mb-4 relative">
+          AI-Powered Vehicle Diagnostics
+          <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-champagne to-transparent"></div>
+        </h1>
+        <p className="text-center text-gray-300 mb-12 text-lg">Advanced diagnostic analysis with blockchain verification</p>
+        
+        <div className="flex mb-8 glass-card rounded-xl p-2">
+          <button
+            className={`px-6 py-3 font-medium rounded-lg transition-all ${activeTab === 'scan' ? 'bg-champagne/20 text-champagne' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('scan')}
+          >
+            Diagnostic Scan
+          </button>
+          <button
+            className={`px-6 py-3 font-medium rounded-lg transition-all ${activeTab === 'codes' ? 'bg-champagne/20 text-champagne' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('codes')}
+          >
+            Common Codes
+          </button>
+          <button
+            className={`px-6 py-3 font-medium rounded-lg transition-all ${activeTab === 'symptoms' ? 'bg-champagne/20 text-champagne' : 'text-gray-400 hover:text-white'}`}
+            onClick={() => setActiveTab('symptoms')}
+          >
+            Symptom Checker
+          </button>
+        </div>
+        
+        {activeTab === 'scan' && (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <div className="glass-diagnostic-card rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 flex items-center text-glow">
+                <Car className="mr-3 text-champagne" />
+                Vehicle Diagnostic Scan
+              </h2>
               
-              <div className="grid grid-cols-2 gap-4">
+              <form onSubmit={handleScan} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Vehicle Year</label>
-                  <select
-                    value={vehicleYear}
-                    onChange={(e) => setVehicleYear(e.target.value)}
-                    className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-                    required
-                  >
-                    <option value="">Select Year</option>
-                    {Array.from({ length: 25 }, (_, i) => 2024 - i).map(year => (
-                      <option key={year} value={year}>{year}</option>
-                    ))}
-                  </select>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Vehicle Make</label>
+                  <div className="glass-card rounded-lg p-1">
+                    <select
+                      value={vehicleMake}
+                      onChange={(e) => {
+                        setVehicleMake(e.target.value);
+                        setVehicleModel(''); // Reset model when make changes
+                      }}
+                      className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+                      required
+                    >
+                      <option value="" className="bg-black">Select Vehicle Make</option>
+                      {popularMakes.map(make => (
+                        <option key={make} value={make} className="bg-black">{make}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Vehicle Model</label>
+                  <div className="glass-card rounded-lg p-1">
+                    <select
+                      value={vehicleModel}
+                      onChange={(e) => setVehicleModel(e.target.value)}
+                      className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+                      disabled={!vehicleMake}
+                      required
+                    >
+                      <option value="" className="bg-black">Select Vehicle Model</option>
+                      {vehicleMake && commonModels[vehicleMake]?.map(model => (
+                        <option key={model} value={model} className="bg-black">{model}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
                 
-                <div>
-                  <label className="block text-sm font-medium text-gray-400 mb-1">Mileage (km)</label>
-                  <input
-                    type="number"
-                    value={mileage}
-                    onChange={(e) => setMileage(e.target.value)}
-                    placeholder="e.g., 85000"
-                    className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-1">Diagnostic Trouble Code</label>
-                <input
-                  type="text"
-                  value={troubleCode}
-                  onChange={(e) => setTroubleCode(e.target.value.toUpperCase())}
-                  placeholder="e.g., P0300"
-                  className="w-full px-4 py-2 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-                  required
-                />
-                <p className="text-xs text-gray-500 mt-1">Enter the code from your OBD2 scanner or check engine light</p>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-400 mb-2">Symptoms (Optional)</label>
-                <div className="grid grid-cols-2 gap-2">
-                  {commonSymptoms.slice(0, 6).map(symptom => (
-                    <label key={symptom} className="flex items-center text-sm">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-3">Vehicle Year</label>
+                    <div className="glass-card rounded-lg p-1">
+                      <select
+                        value={vehicleYear}
+                        onChange={(e) => setVehicleYear(e.target.value)}
+                        className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+                        required
+                      >
+                        <option value="" className="bg-black">Select Year</option>
+                        {Array.from({ length: 25 }, (_, i) => 2024 - i).map(year => (
+                          <option key={year} value={year} className="bg-black">{year}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm font-medium text-gray-300 mb-3">Mileage (km)</label>
+                    <div className="glass-card rounded-lg p-1">
                       <input
-                        type="checkbox"
-                        checked={symptoms.includes(symptom)}
-                        onChange={() => handleSymptomToggle(symptom)}
-                        className="mr-2 text-red-600"
+                        type="number"
+                        value={mileage}
+                        onChange={(e) => setMileage(e.target.value)}
+                        placeholder="e.g., 85000"
+                        className="w-full px-4 py-3 bg-transparent text-white focus:outline-none placeholder-gray-500"
+                        required
                       />
-                      <span className="text-gray-300">{symptom}</span>
-                    </label>
-                  ))}
+                    </div>
+                  </div>
                 </div>
-              </div>
-              
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full bg-gradient-to-r from-red-700 to-red-600 text-white py-3 rounded-md flex items-center justify-center hover:shadow-lg hover:shadow-red-600/30 transition-all duration-300 font-medium"
-              >
-                {isLoading ? (
-                  <>
-                    <span className="animate-spin mr-2">⚙️</span>
-                    Analyzing Vehicle...
-                  </>
-                ) : (
-                  <>
-                    <Cpu size={18} className="mr-2" />
-                    Run AI Diagnostic Analysis
-                  </>
-                )}
-              </button>
-            </form>
-          </div>
-          
-          <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 rounded-lg p-6 shadow-lg">
-            <h2 className="text-xl font-bold mb-4 flex items-center">
-              <Database className="mr-2 text-red-600" />
-              Common Diagnostic Codes
-            </h2>
-            
-            <div className="space-y-2">
-              {commonCodes.map((code) => (
-                <div 
-                  key={code.code}
-                  onClick={() => handleCodeSelect(code.code)}
-                  className="flex justify-between items-center p-3 bg-zinc-800/50 hover:bg-zinc-800 rounded-md cursor-pointer transition-colors"
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Diagnostic Trouble Code</label>
+                  <div className="glass-card rounded-lg p-1">
+                    <input
+                      type="text"
+                      value={troubleCode}
+                      onChange={(e) => setTroubleCode(e.target.value.toUpperCase())}
+                      placeholder="e.g., P0300"
+                      className="w-full px-4 py-3 bg-transparent text-white focus:outline-none placeholder-gray-500"
+                      required
+                    />
+                  </div>
+                  <p className="text-xs text-gray-500 mt-2">Enter the code from your OBD2 scanner or check engine light</p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-3">Symptoms (Optional)</label>
+                  <div className="grid grid-cols-2 gap-3">
+                    {commonSymptoms.slice(0, 6).map(symptom => (
+                      <label key={symptom} className="flex items-center glass-card px-3 py-2 rounded-lg cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={symptoms.includes(symptom)}
+                          onChange={() => handleSymptomToggle(symptom)}
+                          className="mr-3 accent-champagne"
+                        />
+                        <span className="text-gray-300 text-sm">{symptom}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="w-full btn-luxury py-4 rounded-xl text-lg flex items-center justify-center font-medium"
                 >
-                  <div className="flex-1">
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-red-500 font-mono font-bold">{code.code}</span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
+                  {isLoading ? (
+                    <>
+                      <span className="animate-spin mr-3">⚙️</span>
+                      Analyzing Vehicle...
+                    </>
+                  ) : (
+                    <>
+                      <Cpu size={20} className="mr-3" />
+                      Run AI Diagnostic Analysis
+                    </>
+                  )}
+                </button>
+              </form>
+            </div>
+            
+            <div className="glass-card rounded-xl p-8 shadow-lg">
+              <h2 className="text-2xl font-bold mb-6 flex items-center text-glow">
+                <Database className="mr-3 text-champagne" />
+                Common Diagnostic Codes
+              </h2>
+              
+              <div className="space-y-3">
+                {commonCodes.map((code) => (
+                  <div 
+                    key={code.code}
+                    onClick={() => handleCodeSelect(code.code)}
+                    className="glass-card p-4 rounded-lg cursor-pointer hover:bg-white/10 transition-all"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-champagne font-mono font-bold text-lg">{code.code}</span>
+                      <span className={`text-xs px-3 py-1 rounded-full ${
                         code.severity === 'high' ? 'bg-red-600/20 text-red-500' :
                         code.severity === 'medium' ? 'bg-amber-600/20 text-amber-500' :
                         'bg-green-600/20 text-green-500'
@@ -418,222 +443,227 @@ const Diagnostics: React.FC = () => {
                         {code.severity}
                       </span>
                     </div>
-                    <p className="text-sm text-gray-400">{code.description}</p>
+                    <p className="text-sm text-gray-300">{code.description}</p>
                   </div>
-                  <ArrowRight size={16} className="text-gray-500 ml-2" />
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-      
-      {activeTab === 'codes' && (
-        <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 rounded-lg p-6 shadow-lg">
-          <h2 className="text-xl font-bold mb-4">OBD2 Code Reference</h2>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="bg-zinc-800/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 text-red-500">P Codes - Powertrain</h3>
-                <p className="text-gray-400 text-sm mb-3">Related to engine, transmission, and emissions systems</p>
-                <div className="space-y-2">
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">P0xxx</span> - Generic OBD-II codes
-                  </div>
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">P1xxx</span> - Manufacturer-specific codes
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-zinc-800/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 text-amber-500">B Codes - Body</h3>
-                <p className="text-gray-400 text-sm mb-3">Related to body systems like airbags, seatbelts, etc.</p>
-                <div className="space-y-2">
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">B0xxx</span> - Generic body codes
-                  </div>
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">B1xxx</span> - Manufacturer-specific codes
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-zinc-800/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 text-blue-500">C Codes - Chassis</h3>
-                <p className="text-gray-400 text-sm mb-3">Related to chassis systems like brakes, steering, etc.</p>
-                <div className="space-y-2">
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">C0xxx</span> - Generic chassis codes
-                  </div>
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">C1xxx</span> - Manufacturer-specific codes
-                  </div>
-                </div>
-              </div>
-              
-              <div className="bg-zinc-800/50 p-4 rounded-lg">
-                <h3 className="text-lg font-semibold mb-2 text-green-500">U Codes - Network</h3>
-                <p className="text-gray-400 text-sm mb-3">Related to network and computer systems</p>
-                <div className="space-y-2">
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">U0xxx</span> - Generic network codes
-                  </div>
-                  <div className="bg-zinc-700/30 p-2 rounded">
-                    <span className="font-mono text-white">U1xxx</span> - Manufacturer-specific codes
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
-        </div>
-      )}
-
-      {activeTab === 'symptoms' && (
-        <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 rounded-lg p-6 shadow-lg">
-          <h2 className="text-xl font-bold mb-4">Symptom-Based Diagnosis</h2>
-          <p className="text-gray-400 mb-6">Select the symptoms your vehicle is experiencing for AI-powered diagnosis suggestions.</p>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {commonSymptoms.map(symptom => (
-              <label key={symptom} className="flex items-center p-3 bg-zinc-800/50 rounded-lg hover:bg-zinc-800 cursor-pointer transition-colors">
-                <input
-                  type="checkbox"
-                  checked={symptoms.includes(symptom)}
-                  onChange={() => handleSymptomToggle(symptom)}
-                  className="mr-3 text-red-600"
-                />
-                <span className="text-gray-300">{symptom}</span>
-              </label>
-            ))}
-          </div>
-
-          {symptoms.length > 0 && (
-            <div className="mt-6 p-4 bg-red-900/20 border border-red-600/30 rounded-lg">
-              <h3 className="font-semibold text-red-400 mb-2">Selected Symptoms Analysis</h3>
-              <p className="text-gray-300 text-sm">
-                Based on the symptoms you've selected ({symptoms.join(', ')}), 
-                common diagnostic codes to check include: P0300, P0171, P0420. 
-                Consider running a full diagnostic scan for accurate results.
-              </p>
-            </div>
-          )}
-        </div>
-      )}
-      
-      {/* Diagnostic Results */}
-      {diagnosticResult && (
-        <div className="mt-8 bg-gradient-to-br from-zinc-900 to-black border-2 border-red-600 rounded-lg p-6 shadow-lg">
-          <h2 className="text-2xl font-bold mb-6 text-center text-red-600">AI Diagnostic Results</h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-            <div className="bg-zinc-800/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3">Vehicle Information</h3>
-              <div className="space-y-2">
-                <p className="flex justify-between">
-                  <span className="text-gray-400">Vehicle:</span>
-                  <span>{diagnosticResult.vehicle.year} {diagnosticResult.vehicle.make} {diagnosticResult.vehicle.model}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="text-gray-400">Mileage:</span>
-                  <span>{diagnosticResult.vehicle.mileage.toLocaleString()} km</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="text-gray-400">Trouble Code:</span>
-                  <span className="font-mono text-red-500 font-bold">{diagnosticResult.diagnosticResults.troubleCodes[0]}</span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="text-gray-400">Priority:</span>
-                  <span>{getSeverityBadge(diagnosticResult.aiInterpretation.urgencyLevel)}</span>
-                </p>
-              </div>
-            </div>
-            
-            <div className="bg-zinc-800/50 p-4 rounded-lg">
-              <h3 className="text-lg font-semibold mb-3">Cost Estimate</h3>
-              <div className="space-y-2">
-                <p className="flex justify-between">
-                  <span className="text-gray-400">Estimated Range:</span>
-                  <span className="font-bold">
-                    ${diagnosticResult.aiInterpretation.estimatedCost.min} - ${diagnosticResult.aiInterpretation.estimatedCost.max} {diagnosticResult.aiInterpretation.estimatedCost.currency}
-                  </span>
-                </p>
-                <p className="flex justify-between">
-                  <span className="text-gray-400">AI Confidence:</span>
-                  <span>{diagnosticResult.aiInterpretation.confidence}%</span>
-                </p>
-                {diagnosticResult.diagnosticResults.symptoms.length > 0 && (
-                  <div>
-                    <span className="text-gray-400">Reported Symptoms:</span>
-                    <div className="flex flex-wrap gap-1 mt-1">
-                      {diagnosticResult.diagnosticResults.symptoms.map((symptom: string, index: number) => (
-                        <span key={index} className="text-xs bg-blue-900/20 text-blue-400 px-2 py-1 rounded">
-                          {symptom}
-                        </span>
-                      ))}
+        )}
+        
+        {activeTab === 'codes' && (
+          <div className="glass-card rounded-xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold mb-6 text-glow">OBD2 Code Reference</h2>
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="glass-card p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-champagne">P Codes - Powertrain</h3>
+                  <p className="text-gray-300 text-sm mb-4">Related to engine, transmission, and emissions systems</p>
+                  <div className="space-y-3">
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">P0xxx</span> - Generic OBD-II codes
+                    </div>
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">P1xxx</span> - Manufacturer-specific codes
                     </div>
                   </div>
-                )}
+                </div>
+                
+                <div className="glass-card p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-amber-500">B Codes - Body</h3>
+                  <p className="text-gray-300 text-sm mb-4">Related to body systems like airbags, seatbelts, etc.</p>
+                  <div className="space-y-3">
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">B0xxx</span> - Generic body codes
+                    </div>
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">B1xxx</span> - Manufacturer-specific codes
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="glass-card p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-blue-500">C Codes - Chassis</h3>
+                  <p className="text-gray-300 text-sm mb-4">Related to chassis systems like brakes, steering, etc.</p>
+                  <div className="space-y-3">
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">C0xxx</span> - Generic chassis codes
+                    </div>
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">C1xxx</span> - Manufacturer-specific codes
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="glass-card p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold mb-3 text-green-500">U Codes - Network</h3>
+                  <p className="text-gray-300 text-sm mb-4">Related to network and computer systems</p>
+                  <div className="space-y-3">
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">U0xxx</span> - Generic network codes
+                    </div>
+                    <div className="glass-card p-3 rounded-lg">
+                      <span className="font-mono text-white font-bold">U1xxx</span> - Manufacturer-specific codes
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
-          
-          <div className="bg-zinc-800/50 p-4 rounded-lg mb-6">
-            <h3 className="text-lg font-semibold mb-3">AI Interpretation</h3>
-            <p className="text-gray-300 mb-4">{diagnosticResult.aiInterpretation.interpretation}</p>
+        )}
+
+        {activeTab === 'symptoms' && (
+          <div className="glass-card rounded-xl p-8 shadow-lg">
+            <h2 className="text-2xl font-bold mb-6 text-glow">Symptom-Based Diagnosis</h2>
+            <p className="text-gray-300 mb-8 text-lg">Select the symptoms your vehicle is experiencing for AI-powered diagnosis suggestions.</p>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium text-red-500 mb-2">Possible Causes:</h4>
-                <ul className="list-disc list-inside space-y-1 text-gray-300">
-                  {diagnosticResult.diagnosticResults.possibleCauses.map((cause: string, index: number) => (
-                    <li key={index} className="text-sm">{cause}</li>
-                  ))}
-                </ul>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {commonSymptoms.map(symptom => (
+                <label key={symptom} className="flex items-center glass-card p-4 rounded-lg hover:bg-white/10 cursor-pointer transition-all">
+                  <input
+                    type="checkbox"
+                    checked={symptoms.includes(symptom)}
+                    onChange={() => handleSymptomToggle(symptom)}
+                    className="mr-4 accent-champagne"
+                  />
+                  <span className="text-gray-300">{symptom}</span>
+                </label>
+              ))}
+            </div>
+
+            {symptoms.length > 0 && (
+              <div className="mt-8 glass-card p-6 rounded-lg border border-champagne/30">
+                <h3 className="font-semibold text-champagne mb-3 text-lg">Selected Symptoms Analysis</h3>
+                <p className="text-gray-300">
+                  Based on the symptoms you've selected ({symptoms.join(', ')}), 
+                  common diagnostic codes to check include: P0300, P0171, P0420. 
+                  Consider running a full diagnostic scan for accurate results.
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+        
+        {/* Premium Diagnostic Results */}
+        {diagnosticResult && (
+          <div className="mt-12 glass-diagnostic-card rounded-xl p-8 shadow-2xl depth-3">
+            <h2 className="text-3xl font-bold mb-8 text-center text-luxury">AI Diagnostic Results</h2>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+              <div className="glass-card p-6 rounded-lg">
+                <h3 className="text-xl font-semibold mb-4 text-glow">Vehicle Information</h3>
+                <div className="space-y-3">
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">Vehicle:</span>
+                    <span className="text-white font-medium">{diagnosticResult.vehicle.year} {diagnosticResult.vehicle.make} {diagnosticResult.vehicle.model}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">Mileage:</span>
+                    <span className="text-white font-medium">{diagnosticResult.vehicle.mileage.toLocaleString()} km</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">Trouble Code:</span>
+                    <span className="font-mono text-champagne font-bold">{diagnosticResult.diagnosticResults.troubleCodes[0]}</span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">Priority:</span>
+                    <span>{getSeverityBadge(diagnosticResult.aiInterpretation.urgencyLevel)}</span>
+                  </p>
+                </div>
               </div>
               
-              <div>
-                <h4 className="font-medium text-green-500 mb-2">Recommended Actions:</h4>
-                <ul className="list-disc list-inside space-y-1 text-gray-300">
-                  {diagnosticResult.recommendations.map((rec: string, index: number) => (
-                    <li key={index} className="text-sm">{rec}</li>
-                  ))}
-                </ul>
+              <div className="glass-card p-6 rounded-lg">
+                <h3 className="text-xl font-semibold mb-4 text-glow">Cost Estimate</h3>
+                <div className="space-y-3">
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">Estimated Range:</span>
+                    <span className="font-bold text-luxury">
+                      ${diagnosticResult.aiInterpretation.estimatedCost.min} - ${diagnosticResult.aiInterpretation.estimatedCost.max} {diagnosticResult.aiInterpretation.estimatedCost.currency}
+                    </span>
+                  </p>
+                  <p className="flex justify-between">
+                    <span className="text-gray-400">AI Confidence:</span>
+                    <span className="text-white font-medium">{diagnosticResult.aiInterpretation.confidence}%</span>
+                  </p>
+                  {diagnosticResult.diagnosticResults.symptoms.length > 0 && (
+                    <div>
+                      <span className="text-gray-400">Reported Symptoms:</span>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {diagnosticResult.diagnosticResults.symptoms.map((symptom: string, index: number) => (
+                          <span key={index} className="glass-card text-xs text-blue-400 px-3 py-1 rounded-full">
+                            {symptom}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
-          
-          <div className="bg-zinc-800/50 p-4 rounded-lg">
-            <h3 className="text-lg font-semibold mb-3 flex items-center">
-              <Database className="mr-2 text-red-600" size={18} />
-              Blockchain Verification
-            </h3>
-            <div className="space-y-2">
-              <p className="flex justify-between">
-                <span className="text-gray-400">Status:</span>
-                <span className="text-green-500">{diagnosticResult.blockchainRecord.status}</span>
-              </p>
-              <p className="flex justify-between">
-                <span className="text-gray-400">Transaction ID:</span>
-                <span className="font-mono text-xs truncate max-w-[250px]">{diagnosticResult.blockchainRecord.transactionId}</span>
-              </p>
-              <p className="flex justify-between">
-                <span className="text-gray-400">Timestamp:</span>
-                <span>{new Date(diagnosticResult.blockchainRecord.consensusTimestamp).toLocaleString()}</span>
-              </p>
-              <div className="mt-4 text-center">
-                <p className="text-xs text-gray-500">This diagnostic result has been securely recorded on Hedera Hashgraph blockchain for authenticity and immutability.</p>
+            
+            <div className="glass-card p-6 rounded-lg mb-8">
+              <h3 className="text-xl font-semibold mb-4 text-glow">AI Interpretation</h3>
+              <p className="text-gray-300 mb-6 text-lg leading-relaxed">{diagnosticResult.aiInterpretation.interpretation}</p>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                  <h4 className="font-medium text-champagne mb-3 text-lg">Possible Causes:</h4>
+                  <ul className="space-y-2 text-gray-300">
+                    {diagnosticResult.diagnosticResults.possibleCauses.map((cause: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-champagne mr-2">•</span>
+                        <span>{cause}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+                
+                <div>
+                  <h4 className="font-medium text-green-500 mb-3 text-lg">Recommended Actions:</h4>
+                  <ul className="space-y-2 text-gray-300">
+                    {diagnosticResult.recommendations.map((rec: string, index: number) => (
+                      <li key={index} className="flex items-start">
+                        <span className="text-green-500 mr-2">•</span>
+                        <span>{rec}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
             </div>
+            
+            <div className="glass-card p-6 rounded-lg">
+              <h3 className="text-xl font-semibold mb-4 flex items-center text-glow">
+                <Database className="mr-3 text-champagne" size={20} />
+                Blockchain Verification
+              </h3>
+              <div className="space-y-3">
+                <p className="flex justify-between">
+                  <span className="text-gray-400">Status:</span>
+                  <span className="text-green-500 font-medium">{diagnosticResult.blockchainRecord.status}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-400">Transaction ID:</span>
+                  <span className="font-mono text-xs text-gray-300 bg-black/30 px-3 py-1 rounded-lg">{diagnosticResult.blockchainRecord.transactionId}</span>
+                </p>
+                <p className="flex justify-between">
+                  <span className="text-gray-400">Timestamp:</span>
+                  <span className="text-gray-300">{new Date(diagnosticResult.blockchainRecord.consensusTimestamp).toLocaleString()}</span>
+                </p>
+                <div className="mt-4 text-center">
+                  <p className="text-xs text-gray-500">This diagnostic result has been securely recorded on Hedera Hashgraph blockchain for authenticity and immutability.</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-center">
+              <button className="btn-luxury px-8 py-4 rounded-xl text-lg font-medium">
+                Find Compatible Parts in Marketplace
+              </button>
+            </div>
           </div>
-          
-          <div className="mt-6 flex justify-center">
-            <button className="bg-gradient-to-r from-red-700 to-red-600 text-white px-6 py-3 rounded-md hover:shadow-lg hover:shadow-red-600/30 transition-all duration-300 font-medium">
-              Find Compatible Parts in Marketplace
-            </button>
-          </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };

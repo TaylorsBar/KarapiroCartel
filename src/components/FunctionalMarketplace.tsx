@@ -268,210 +268,252 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-black text-white flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin w-12 h-12 border-4 border-red-600 border-t-transparent rounded-full mx-auto mb-4"></div>
-          <p className="text-gray-400">Loading automotive parts database...</p>
+      <div className="min-h-screen animated-bg text-white flex items-center justify-center relative overflow-hidden">
+        <div className="particles">
+          {[...Array(20)].map((_, i) => (
+            <div 
+              key={i} 
+              className="particle" 
+              style={{
+                left: `${Math.random() * 100}%`,
+                animationDelay: `${Math.random() * 8}s`,
+                animationDuration: `${8 + Math.random() * 4}s`
+              }}
+            />
+          ))}
+        </div>
+        <div className="text-center glass-card p-8 rounded-xl depth-3">
+          <div className="animate-spin w-16 h-16 border-4 border-champagne border-t-transparent rounded-full mx-auto mb-6"></div>
+          <p className="text-luxury text-xl">Loading Premium Parts Database...</p>
+          <p className="text-gray-400 mt-2">Connecting to live inventory systems</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-center text-red-600 uppercase tracking-wider mb-12 relative">
-        Live Automotive Parts Database
-        <span className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-20 h-1 bg-gradient-to-r from-red-700 to-red-500"></span>
-      </h1>
+    <div className="min-h-screen animated-bg relative overflow-hidden">
+      <div className="particles">
+        {[...Array(15)].map((_, i) => (
+          <div 
+            key={i} 
+            className="particle" 
+            style={{
+              left: `${Math.random() * 100}%`,
+              animationDelay: `${Math.random() * 8}s`,
+              animationDuration: `${8 + Math.random() * 4}s`
+            }}
+          />
+        ))}
+      </div>
+      
+      <div className="container mx-auto px-4 py-8 relative depth-2">
+        <h1 className="text-4xl font-bold text-center text-luxury uppercase tracking-wider mb-4 relative">
+          Ultra-Premium Parts Marketplace
+          <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-champagne to-transparent"></div>
+        </h1>
+        <p className="text-center text-gray-300 mb-12 text-lg">Live automotive database with blockchain verification</p>
 
-      {/* Search and Controls */}
-      <div className="mb-8">
-        <div className="flex flex-col lg:flex-row gap-4 mb-6">
-          {/* Search Bar */}
-          <div className="flex-1 relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={20} />
-            <input
-              type="text"
-              placeholder="Search parts, brands, part numbers..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-3 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
+        {/* Premium Search and Controls */}
+        <div className="mb-8">
+          <div className="flex flex-col lg:flex-row gap-6 mb-8">
+            {/* Luxury Search Bar */}
+            <div className="flex-1 relative">
+              <div className="glass-card rounded-xl p-1">
+                <div className="relative">
+                  <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-champagne" size={20} />
+                  <input
+                    type="text"
+                    placeholder="Search premium automotive parts..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="w-full pl-12 pr-4 py-4 bg-transparent text-white placeholder-gray-400 focus:outline-none text-lg"
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Premium Controls */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowFilters(!showFilters)}
+                className={`btn-luxury px-6 py-4 rounded-xl transition-all duration-300 ${
+                  showFilters ? 'bg-champagne/20 border-champagne' : ''
+                }`}
+              >
+                <Filter size={20} />
+              </button>
+              
+              <div className="glass-card rounded-xl p-1">
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value as any)}
+                  className="px-6 py-4 bg-transparent text-white focus:outline-none cursor-pointer"
+                >
+                  <option value="relevance" className="bg-black">Sort by Relevance</option>
+                  <option value="price_low" className="bg-black">Price: Low to High</option>
+                  <option value="price_high" className="bg-black">Price: High to Low</option>
+                  <option value="newest" className="bg-black">Newest First</option>
+                </select>
+              </div>
+
+              <div className="glass-card rounded-xl p-1 flex">
+                <button
+                  onClick={() => setViewMode('grid')}
+                  className={`p-4 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-champagne/20 text-champagne' : 'text-gray-400 hover:text-white'}`}
+                >
+                  <Grid size={20} />
+                </button>
+                <button
+                  onClick={() => setViewMode('list')}
+                  className={`p-4 rounded-lg transition-all ${viewMode === 'list' ? 'bg-champagne/20 text-champagne' : 'text-gray-400 hover:text-white'}`}
+                >
+                  <List size={20} />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Premium Filters Panel */}
+          {showFilters && (
+            <div className="glass-card rounded-xl p-8 mb-8 depth-1">
+              <FiltersPanel 
+                filters={filters} 
+                onFiltersChange={setFilters}
+                categories={categories}
+                brands={brands}
+                compatibleVehicles={compatibleVehicles}
+              />
+            </div>
+          )}
+        </div>
+
+        <div className="flex flex-col xl:flex-row gap-8">
+          {/* Premium Parts Grid/List */}
+          <div className="xl:w-2/3">
+            <div className="mb-6 flex justify-between items-center">
+              <p className="text-gray-300 text-lg">
+                Showing <span className="text-champagne font-bold">{filteredParts.length}</span> of <span className="text-champagne font-bold">{parts.length}</span> premium parts
+              </p>
+            </div>
+
+            {viewMode === 'grid' ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {filteredParts.map(part => (
+                  <PartCard 
+                    key={part.id} 
+                    part={part} 
+                    onAddToCart={addToCart} 
+                  />
+                ))}
+              </div>
+            ) : (
+              <div className="space-y-6">
+                {filteredParts.map(part => (
+                  <PartListItem 
+                    key={part.id} 
+                    part={part} 
+                    onAddToCart={addToCart} 
+                  />
+                ))}
+              </div>
+            )}
+
+            {filteredParts.length === 0 && (
+              <div className="text-center py-16">
+                <div className="glass-card rounded-xl p-12 max-w-md mx-auto">
+                  <p className="text-gray-300 text-xl mb-6">No premium parts found matching your criteria.</p>
+                  <button
+                    onClick={() => {
+                      setFilters({
+                        category: '',
+                        brand: '',
+                        priceRange: [0, 5000],
+                        compatibility: '',
+                        inStock: true,
+                        verified: false
+                      });
+                      setSearchTerm('');
+                    }}
+                    className="btn-luxury px-8 py-3 rounded-xl"
+                  >
+                    Clear All Filters
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Premium Shopping Cart */}
+          <div className="xl:w-1/3">
+            <CartComponent
+              cart={cart}
+              onRemove={removeFromCart}
+              onUpdateQuantity={updateQuantity}
+              onCheckout={handleCheckout}
+              subtotal={calculateSubtotal()}
+              shipping={calculateShipping()}
+              total={calculateTotal()}
             />
           </div>
-
-          {/* Controls */}
-          <div className="flex gap-2">
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className={`px-4 py-3 rounded-md border transition-colors ${
-                showFilters 
-                  ? 'border-red-600 bg-red-600 text-white' 
-                  : 'border-zinc-700 text-gray-400 hover:text-white'
-              }`}
-            >
-              <Filter size={20} />
-            </button>
-            
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as any)}
-              className="px-4 py-3 bg-zinc-800 border border-zinc-700 rounded-md focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-            >
-              <option value="relevance">Sort by Relevance</option>
-              <option value="price_low">Price: Low to High</option>
-              <option value="price_high">Price: High to Low</option>
-              <option value="newest">Newest First</option>
-            </select>
-
-            <div className="flex border border-zinc-700 rounded-md overflow-hidden">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-3 ${viewMode === 'grid' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'}`}
-              >
-                <Grid size={20} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-3 ${viewMode === 'list' ? 'bg-red-600 text-white' : 'text-gray-400 hover:text-white'}`}
-              >
-                <List size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Filters Panel */}
-        {showFilters && (
-          <FiltersPanel 
-            filters={filters} 
-            onFiltersChange={setFilters}
-            categories={categories}
-            brands={brands}
-            compatibleVehicles={compatibleVehicles}
-          />
-        )}
-      </div>
-
-      <div className="flex flex-col xl:flex-row gap-8">
-        {/* Parts Grid/List */}
-        <div className="xl:w-2/3">
-          <div className="mb-4 flex justify-between items-center">
-            <p className="text-gray-400">
-              Showing {filteredParts.length} of {parts.length} parts
-            </p>
-          </div>
-
-          {viewMode === 'grid' ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredParts.map(part => (
-                <PartCard 
-                  key={part.id} 
-                  part={part} 
-                  onAddToCart={addToCart} 
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {filteredParts.map(part => (
-                <PartListItem 
-                  key={part.id} 
-                  part={part} 
-                  onAddToCart={addToCart} 
-                />
-              ))}
-            </div>
-          )}
-
-          {filteredParts.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-gray-400 text-lg">No parts found matching your criteria.</p>
-              <button
-                onClick={() => {
-                  setFilters({
-                    category: '',
-                    brand: '',
-                    priceRange: [0, 5000],
-                    compatibility: '',
-                    inStock: true,
-                    verified: false
-                  });
-                  setSearchTerm('');
-                }}
-                className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md transition-colors"
-              >
-                Clear Filters
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Shopping Cart */}
-        <div className="xl:w-1/3">
-          <CartComponent
-            cart={cart}
-            onRemove={removeFromCart}
-            onUpdateQuantity={updateQuantity}
-            onCheckout={handleCheckout}
-            subtotal={calculateSubtotal()}
-            shipping={calculateShipping()}
-            total={calculateTotal()}
-          />
         </div>
       </div>
     </div>
   );
 };
 
-// Part Card Component
+// Premium Part Card Component
 const PartCard: React.FC<{
   part: Part;
   onAddToCart: (part: Part, quantity: number) => void;
 }> = ({ part, onAddToCart }) => {
   return (
-    <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 hover:border-red-600 rounded-lg overflow-hidden transition-all duration-300 hover:shadow-lg hover:shadow-red-600/20">
-      <div className="h-48 overflow-hidden relative">
+    <div className="glass-marketplace-card rounded-xl overflow-hidden glass-hover float-element">
+      <div className="h-56 overflow-hidden relative">
         <img 
           src={part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
           alt={part.name} 
-          className="w-full h-full object-cover transition-transform duration-500 hover:scale-110"
+          className="w-full h-full object-cover transition-transform duration-700 hover:scale-110"
         />
         
-        {/* Badges */}
-        <div className="absolute top-2 left-2 flex flex-col gap-1">
+        {/* Premium Badges */}
+        <div className="absolute top-4 left-4 flex flex-col gap-2">
           {part.blockchain_verified && (
-            <span className="bg-green-600/90 text-white text-xs px-2 py-1 rounded-full flex items-center">
-              <Shield size={10} className="mr-1" />
+            <span className="glass-card px-3 py-1 rounded-full text-xs font-medium text-green-400 flex items-center">
+              <Shield size={12} className="mr-1" />
               Verified
             </span>
           )}
           {part.stock_quantity > 0 && (
-            <span className="bg-blue-600/90 text-white text-xs px-2 py-1 rounded-full">
+            <span className="glass-card px-3 py-1 rounded-full text-xs font-medium text-blue-400">
               {part.stock_quantity} in stock
             </span>
           )}
         </div>
+
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
       </div>
       
-      <div className="p-5">
-        <div className="mb-3">
-          <h3 className="text-lg font-semibold text-white mb-1">{part.name}</h3>
-          <p className="text-red-500 text-sm font-medium uppercase">{part.brand}</p>
+      <div className="p-6">
+        <div className="mb-4">
+          <h3 className="text-xl font-bold text-white mb-2 text-glow">{part.name}</h3>
+          <p className="text-champagne text-sm font-medium uppercase tracking-wider">{part.brand}</p>
           {part.part_number && (
-            <p className="text-gray-400 text-xs">Part #: {part.part_number}</p>
+            <p className="text-gray-400 text-xs mt-1">Part #: {part.part_number}</p>
           )}
         </div>
 
-        <div className="mb-3">
-          <span className="text-xs bg-zinc-800 text-gray-300 px-2 py-1 rounded">{part.category}</span>
+        <div className="mb-4">
+          <span className="glass-card px-3 py-1 rounded-full text-xs text-gray-300">{part.category}</span>
         </div>
 
         {part.compatibility.length > 0 && (
-          <div className="mb-3">
-            <p className="text-xs text-gray-400 mb-1">Compatible with:</p>
+          <div className="mb-4">
+            <p className="text-xs text-gray-400 mb-2">Compatible with:</p>
             <div className="flex flex-wrap gap-1">
               {part.compatibility.slice(0, 2).map((vehicle, index) => (
-                <span key={index} className="text-xs bg-red-900/20 text-red-400 px-2 py-1 rounded">
+                <span key={index} className="text-xs bg-champagne/20 text-champagne px-2 py-1 rounded-full">
                   {vehicle}
                 </span>
               ))}
@@ -484,15 +526,15 @@ const PartCard: React.FC<{
         
         <div className="flex justify-between items-center">
           <div>
-            <span className="text-2xl font-bold">${part.price.toFixed(2)}</span>
+            <span className="text-2xl font-bold text-luxury">${part.price.toFixed(2)}</span>
             <span className="text-sm text-gray-400 ml-1">{part.currency}</span>
           </div>
           <button
-            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm flex items-center transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-luxury px-6 py-3 rounded-xl text-sm flex items-center disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => onAddToCart(part, 1)}
             disabled={part.stock_quantity === 0}
           >
-            <ShoppingCart size={16} className="mr-1" />
+            <ShoppingCart size={16} className="mr-2" />
             {part.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
           </button>
         </div>
@@ -501,48 +543,44 @@ const PartCard: React.FC<{
   );
 };
 
-// Part List Item Component
+// Premium Part List Item Component
 const PartListItem: React.FC<{
   part: Part;
   onAddToCart: (part: Part, quantity: number) => void;
 }> = ({ part, onAddToCart }) => {
   return (
-    <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 hover:border-red-600 rounded-lg p-6 transition-all duration-300">
-      <div className="flex gap-6">
-        <div className="w-32 h-32 flex-shrink-0">
+    <div className="glass-marketplace-card rounded-xl p-8 glass-hover">
+      <div className="flex gap-8">
+        <div className="w-40 h-40 flex-shrink-0">
           <img 
             src={part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
             alt={part.name} 
-            className="w-full h-full object-cover rounded-md"
+            className="w-full h-full object-cover rounded-lg"
           />
         </div>
         
         <div className="flex-1">
-          <div className="flex justify-between items-start mb-2">
+          <div className="flex justify-between items-start mb-4">
             <div>
-              <h3 className="text-xl font-semibold text-white">{part.name}</h3>
-              <p className="text-red-500 font-medium">{part.brand}</p>
+              <h3 className="text-2xl font-bold text-white text-glow">{part.name}</h3>
+              <p className="text-champagne font-medium text-lg">{part.brand}</p>
               {part.part_number && (
                 <p className="text-gray-400 text-sm">Part #: {part.part_number}</p>
               )}
             </div>
             <div className="text-right">
-              <div className="text-2xl font-bold">${part.price.toFixed(2)}</div>
+              <div className="text-3xl font-bold text-luxury">${part.price.toFixed(2)}</div>
               <div className="text-sm text-gray-400">{part.currency}</div>
             </div>
           </div>
 
-          <p className="text-gray-400 text-sm mb-3 line-clamp-2">{part.description}</p>
+          <p className="text-gray-300 text-sm mb-4 line-clamp-2">{part.description}</p>
 
-          <div className="flex flex-wrap gap-4 mb-4 text-sm">
-            <span className="flex items-center text-gray-400">
-              <span className="bg-zinc-800 px-2 py-1 rounded text-xs mr-2">{part.category}</span>
-            </span>
-            <span className="text-gray-400">
-              Stock: {part.stock_quantity}
-            </span>
+          <div className="flex flex-wrap gap-4 mb-6 text-sm">
+            <span className="glass-card px-3 py-1 rounded-full text-gray-300">{part.category}</span>
+            <span className="text-gray-400">Stock: {part.stock_quantity}</span>
             {part.blockchain_verified && (
-              <span className="flex items-center text-green-500">
+              <span className="flex items-center text-green-400">
                 <Shield size={14} className="mr-1" />
                 Blockchain Verified
               </span>
@@ -552,17 +590,17 @@ const PartListItem: React.FC<{
           <div className="flex justify-between items-center">
             <div className="flex gap-2">
               {part.compatibility.slice(0, 3).map((vehicle, index) => (
-                <span key={index} className="bg-red-900/20 text-red-400 px-2 py-1 rounded-full text-xs">
+                <span key={index} className="bg-champagne/20 text-champagne px-3 py-1 rounded-full text-xs">
                   {vehicle}
                 </span>
               ))}
               {part.compatibility.length > 3 && (
-                <span className="text-xs text-gray-500 px-2 py-1">+{part.compatibility.length - 3} more</span>
+                <span className="text-xs text-gray-500 px-3 py-1">+{part.compatibility.length - 3} more</span>
               )}
             </div>
             
             <button
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md flex items-center transition-colors duration-300 disabled:opacity-50"
+              className="btn-luxury px-8 py-3 rounded-xl flex items-center disabled:opacity-50"
               onClick={() => onAddToCart(part, 1)}
               disabled={part.stock_quantity === 0}
             >
@@ -576,7 +614,7 @@ const PartListItem: React.FC<{
   );
 };
 
-// Filters Panel Component
+// Premium Filters Panel Component
 const FiltersPanel: React.FC<{
   filters: Filters;
   onFiltersChange: (filters: Filters) => void;
@@ -585,105 +623,115 @@ const FiltersPanel: React.FC<{
   compatibleVehicles: string[];
 }> = ({ filters, onFiltersChange, categories, brands, compatibleVehicles }) => {
   return (
-    <div className="bg-gradient-to-br from-zinc-900 to-black border border-zinc-700 rounded-lg p-6">
-      <h3 className="text-lg font-semibold mb-4">Filters</h3>
+    <div>
+      <h3 className="text-2xl font-bold text-luxury mb-6">Premium Filters</h3>
       
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Category</label>
-          <select
-            value={filters.category}
-            onChange={(e) => onFiltersChange({ ...filters, category: e.target.value })}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm"
-          >
-            <option value="">All Categories</option>
-            {categories.map(category => (
-              <option key={category} value={category}>{category}</option>
-            ))}
-          </select>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Category</label>
+          <div className="glass-card rounded-lg p-1">
+            <select
+              value={filters.category}
+              onChange={(e) => onFiltersChange({ ...filters, category: e.target.value })}
+              className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+            >
+              <option value="" className="bg-black">All Categories</option>
+              {categories.map(category => (
+                <option key={category} value={category} className="bg-black">{category}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Brand</label>
-          <select
-            value={filters.brand}
-            onChange={(e) => onFiltersChange({ ...filters, brand: e.target.value })}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm"
-          >
-            <option value="">All Brands</option>
-            {brands.map(brand => (
-              <option key={brand} value={brand}>{brand}</option>
-            ))}
-          </select>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Brand</label>
+          <div className="glass-card rounded-lg p-1">
+            <select
+              value={filters.brand}
+              onChange={(e) => onFiltersChange({ ...filters, brand: e.target.value })}
+              className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+            >
+              <option value="" className="bg-black">All Brands</option>
+              {brands.map(brand => (
+                <option key={brand} value={brand} className="bg-black">{brand}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Compatible Vehicle</label>
-          <select
-            value={filters.compatibility}
-            onChange={(e) => onFiltersChange({ ...filters, compatibility: e.target.value })}
-            className="w-full px-3 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm"
-          >
-            <option value="">All Vehicles</option>
-            {compatibleVehicles.map(vehicle => (
-              <option key={vehicle} value={vehicle}>{vehicle}</option>
-            ))}
-          </select>
+          <label className="block text-sm font-medium text-gray-300 mb-3">Compatible Vehicle</label>
+          <div className="glass-card rounded-lg p-1">
+            <select
+              value={filters.compatibility}
+              onChange={(e) => onFiltersChange({ ...filters, compatibility: e.target.value })}
+              className="w-full px-4 py-3 bg-transparent text-white focus:outline-none"
+            >
+              <option value="" className="bg-black">All Vehicles</option>
+              {compatibleVehicles.map(vehicle => (
+                <option key={vehicle} value={vehicle} className="bg-black">{vehicle}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-400 mb-2">Price Range</label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              placeholder="Min"
-              value={filters.priceRange[0]}
-              onChange={(e) => onFiltersChange({ 
-                ...filters, 
-                priceRange: [parseInt(e.target.value) || 0, filters.priceRange[1]] 
-              })}
-              className="w-full px-2 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm"
-            />
-            <input
-              type="number"
-              placeholder="Max"
-              value={filters.priceRange[1]}
-              onChange={(e) => onFiltersChange({ 
-                ...filters, 
-                priceRange: [filters.priceRange[0], parseInt(e.target.value) || 5000] 
-              })}
-              className="w-full px-2 py-2 bg-zinc-800 border border-zinc-700 rounded-md text-white text-sm"
-            />
+          <label className="block text-sm font-medium text-gray-300 mb-3">Price Range</label>
+          <div className="flex gap-3">
+            <div className="glass-card rounded-lg p-1 flex-1">
+              <input
+                type="number"
+                placeholder="Min"
+                value={filters.priceRange[0]}
+                onChange={(e) => onFiltersChange({ 
+                  ...filters, 
+                  priceRange: [parseInt(e.target.value) || 0, filters.priceRange[1]] 
+                })}
+                className="w-full px-3 py-3 bg-transparent text-white focus:outline-none"
+              />
+            </div>
+            <div className="glass-card rounded-lg p-1 flex-1">
+              <input
+                type="number"
+                placeholder="Max"
+                value={filters.priceRange[1]}
+                onChange={(e) => onFiltersChange({ 
+                  ...filters, 
+                  priceRange: [filters.priceRange[0], parseInt(e.target.value) || 5000] 
+                })}
+                className="w-full px-3 py-3 bg-transparent text-white focus:outline-none"
+              />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-4">
-        <label className="flex items-center">
+      <div className="mt-6 flex flex-wrap gap-6">
+        <label className="flex items-center glass-card px-4 py-2 rounded-lg cursor-pointer">
           <input
             type="checkbox"
             checked={filters.verified}
             onChange={(e) => onFiltersChange({ ...filters, verified: e.target.checked })}
-            className="mr-2"
+            className="mr-3 accent-champagne"
           />
-          <span className="text-sm text-gray-400">Blockchain Verified Only</span>
+          <span className="text-sm text-gray-300">Blockchain Verified Only</span>
         </label>
         
-        <label className="flex items-center">
+        <label className="flex items-center glass-card px-4 py-2 rounded-lg cursor-pointer">
           <input
             type="checkbox"
             checked={filters.inStock}
             onChange={(e) => onFiltersChange({ ...filters, inStock: e.target.checked })}
-            className="mr-2"
+            className="mr-3 accent-champagne"
           />
-          <span className="text-sm text-gray-400">In Stock Only</span>
+          <span className="text-sm text-gray-300">In Stock Only</span>
         </label>
       </div>
     </div>
   );
 };
 
-// Shopping Cart Component
+// Premium Shopping Cart Component
 const CartComponent: React.FC<{
   cart: CartItem[];
   onRemove: (partId: string) => void;
@@ -694,23 +742,25 @@ const CartComponent: React.FC<{
   total: number;
 }> = ({ cart, onRemove, onUpdateQuantity, onCheckout, subtotal, shipping, total }) => {
   return (
-    <div className="bg-gradient-to-br from-zinc-900 to-black border-2 border-red-600 rounded-lg shadow-lg sticky top-24">
-      <div className="p-6">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-bold flex items-center">
-            <ShoppingCart className="mr-2" size={20} />
-            Shopping Cart
+    <div className="glass-cart rounded-xl shadow-2xl sticky top-24 depth-3">
+      <div className="p-8">
+        <div className="flex items-center justify-between mb-8">
+          <h2 className="text-2xl font-bold text-luxury flex items-center">
+            <ShoppingCart className="mr-3" size={24} />
+            Premium Cart
           </h2>
-          <span className="bg-red-600/20 text-red-500 text-sm px-2 py-1 rounded">
+          <span className="glass-card px-4 py-2 rounded-full text-sm text-champagne font-medium">
             {cart.length} {cart.length === 1 ? 'item' : 'items'}
           </span>
         </div>
         
         {cart.length === 0 ? (
-          <div className="text-center py-8">
-            <ShoppingCart className="w-16 h-16 text-gray-600 mx-auto mb-4" />
-            <p className="text-gray-400">Your cart is empty</p>
-            <p className="text-sm text-gray-500 mt-2">Add some parts to get started</p>
+          <div className="text-center py-12">
+            <div className="glass-card rounded-xl p-8">
+              <ShoppingCart className="w-20 h-20 text-gray-600 mx-auto mb-6" />
+              <p className="text-gray-300 text-lg mb-2">Your premium cart is empty</p>
+              <p className="text-sm text-gray-500">Add some luxury automotive parts to get started</p>
+            </div>
           </div>
         ) : (
           <>
@@ -725,37 +775,37 @@ const CartComponent: React.FC<{
               ))}
             </div>
             
-            <div className="mt-6 pt-6 border-t border-zinc-700">
-              <div className="space-y-2 mb-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Subtotal</span>
-                  <span>${subtotal.toFixed(2)}</span>
+            <div className="mt-8 pt-8 border-t border-gray-700">
+              <div className="space-y-3 mb-6">
+                <div className="flex justify-between text-lg">
+                  <span className="text-gray-300">Subtotal</span>
+                  <span className="text-white font-medium">${subtotal.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Shipping</span>
-                  <span className={shipping === 0 ? 'text-green-500' : ''}>
+                <div className="flex justify-between text-lg">
+                  <span className="text-gray-300">Shipping</span>
+                  <span className={`font-medium ${shipping === 0 ? 'text-green-400' : 'text-white'}`}>
                     {shipping === 0 ? 'FREE' : `$${shipping.toFixed(2)}`}
                   </span>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-gray-400">Tax (15%)</span>
-                  <span>${(subtotal * 0.15).toFixed(2)}</span>
+                <div className="flex justify-between text-lg">
+                  <span className="text-gray-300">Tax (15%)</span>
+                  <span className="text-white font-medium">${(subtotal * 0.15).toFixed(2)}</span>
                 </div>
               </div>
               
-              <div className="flex justify-between text-xl font-bold mb-6">
-                <span>Total</span>
-                <span className="text-red-500">${(total * 1.15).toFixed(2)} NZD</span>
+              <div className="flex justify-between text-2xl font-bold mb-8 pt-4 border-t border-gray-700">
+                <span className="text-white">Total</span>
+                <span className="text-luxury">${(total * 1.15).toFixed(2)} NZD</span>
               </div>
               
               {subtotal < 100 && (
-                <div className="mb-4 p-3 bg-blue-900/20 border border-blue-600/30 rounded-lg">
-                  <p className="text-blue-400 text-sm">
-                    Add ${(100 - subtotal).toFixed(2)} more for free shipping!
+                <div className="mb-6 glass-card p-4 rounded-lg">
+                  <p className="text-blue-400 text-sm mb-3">
+                    Add <span className="font-bold">${(100 - subtotal).toFixed(2)}</span> more for free shipping!
                   </p>
-                  <div className="w-full bg-zinc-800 rounded-full h-2 mt-2">
+                  <div className="w-full bg-gray-800 rounded-full h-3">
                     <div 
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300" 
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 h-3 rounded-full transition-all duration-500" 
                       style={{ width: `${Math.min((subtotal / 100) * 100, 100)}%` }}
                     ></div>
                   </div>
@@ -763,18 +813,19 @@ const CartComponent: React.FC<{
               )}
               
               <button
-                className="w-full bg-gradient-to-r from-red-700 to-red-600 text-white py-3 rounded-md flex items-center justify-center hover:shadow-lg hover:shadow-red-600/30 transition-all duration-300 font-medium"
+                className="w-full btn-luxury py-4 rounded-xl text-lg flex items-center justify-center font-medium"
                 onClick={onCheckout}
                 disabled={cart.length === 0}
               >
-                <CheckCircle size={18} className="mr-2" />
-                Complete Purchase with HBAR
+                <CheckCircle size={20} className="mr-3" />
+                Complete Premium Purchase
               </button>
               
-              <div className="mt-4 text-xs text-center text-gray-500">
-                <p>✓ Secure blockchain payments</p>
+              <div className="mt-6 text-xs text-center text-gray-400 space-y-1">
+                <p>✓ Secure blockchain payments with HBAR</p>
                 <p>✓ Parts authenticity guaranteed</p>
-                <p>✓ 30-day return policy</p>
+                <p>✓ 30-day premium return policy</p>
+                <p>✓ White-glove delivery service</p>
               </div>
             </div>
           </>
@@ -784,52 +835,54 @@ const CartComponent: React.FC<{
   );
 };
 
-// Cart Item Component
+// Premium Cart Item Component
 const CartItem: React.FC<{
   item: CartItem;
   onRemove: (partId: string) => void;
   onUpdateQuantity: (partId: string, quantity: number) => void;
 }> = ({ item, onRemove, onUpdateQuantity }) => {
   return (
-    <div className="flex items-start space-x-4 p-3 bg-zinc-800/50 rounded-lg">
-      <img 
-        src={item.part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
-        alt={item.part.name} 
-        className="w-16 h-16 object-cover rounded"
-      />
-      
-      <div className="flex-1 min-w-0">
-        <h4 className="text-sm font-medium truncate">{item.part.name}</h4>
-        <p className="text-xs text-red-500">{item.part.brand}</p>
-        <p className="text-xs text-gray-400">Stock: {item.part.stock_quantity}</p>
+    <div className="glass-card rounded-lg p-4">
+      <div className="flex items-start space-x-4">
+        <img 
+          src={item.part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
+          alt={item.part.name} 
+          className="w-20 h-20 object-cover rounded-lg"
+        />
         
-        <div className="flex items-center justify-between mt-2">
-          <div className="flex items-center space-x-2">
-            <button 
-              className="w-6 h-6 flex items-center justify-center bg-zinc-700 rounded-md hover:bg-zinc-600 text-xs"
-              onClick={() => onUpdateQuantity(item.part.id, item.quantity - 1)}
-            >
-              <Minus size={12} />
-            </button>
-            <span className="text-sm w-8 text-center">{item.quantity}</span>
-            <button 
-              className="w-6 h-6 flex items-center justify-center bg-zinc-700 rounded-md hover:bg-zinc-600 text-xs"
-              onClick={() => onUpdateQuantity(item.part.id, item.quantity + 1)}
-              disabled={item.quantity >= item.part.stock_quantity}
-            >
-              <Plus size={12} />
-            </button>
+        <div className="flex-1 min-w-0">
+          <h4 className="text-lg font-medium text-white truncate">{item.part.name}</h4>
+          <p className="text-sm text-champagne">{item.part.brand}</p>
+          <p className="text-xs text-gray-400">Stock: {item.part.stock_quantity}</p>
+          
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex items-center space-x-3">
+              <button 
+                className="glass-card w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+                onClick={() => onUpdateQuantity(item.part.id, item.quantity - 1)}
+              >
+                <Minus size={14} />
+              </button>
+              <span className="text-lg font-medium w-8 text-center">{item.quantity}</span>
+              <button 
+                className="glass-card w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors"
+                onClick={() => onUpdateQuantity(item.part.id, item.quantity + 1)}
+                disabled={item.quantity >= item.part.stock_quantity}
+              >
+                <Plus size={14} />
+              </button>
+            </div>
+            <span className="text-lg font-bold text-luxury">${(item.part.price * item.quantity).toFixed(2)}</span>
           </div>
-          <span className="text-sm font-medium">${(item.part.price * item.quantity).toFixed(2)}</span>
         </div>
+        
+        <button 
+          className="text-gray-400 hover:text-red-400 transition-colors p-2"
+          onClick={() => onRemove(item.part.id)}
+        >
+          <X size={18} />
+        </button>
       </div>
-      
-      <button 
-        className="text-gray-400 hover:text-red-500 transition-colors"
-        onClick={() => onRemove(item.part.id)}
-      >
-        <X size={16} />
-      </button>
     </div>
   );
 };
