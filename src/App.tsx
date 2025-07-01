@@ -107,19 +107,19 @@ const App: React.FC = () => {
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
             <div className="flex items-center">
-              {/* Circular Logo in Header */}
-              <div className="relative w-12 h-12 mr-4">
+              {/* Larger Circular Logo in Header */}
+              <div className="relative w-16 h-16 mr-4">
                 <div className="w-full h-full bg-black rounded-full border-2 border-champagne shadow-lg shadow-champagne/30 overflow-hidden flex items-center justify-center">
                   <img 
                     src="/image (6).png" 
                     alt="Karapiro Cartel Logo" 
-                    className="w-10 h-10 object-contain animate-flag-wave"
+                    className="w-14 h-14 object-contain animate-flag-wave"
                     onError={(e) => {
                       // Fallback to Car icon if image fails to load
                       const target = e.target as HTMLImageElement;
                       target.style.display = 'none';
                       const fallback = document.createElement('div');
-                      fallback.innerHTML = '<svg class="text-champagne" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h2.4a.6.6 0 0 0 .6-.6V12a4 4 0 0 0-4-4h-3"/><circle cx="7" cy="18" r="2"/><path d="M15 18H9"/><circle cx="17" cy="18" r="2"/></svg>';
+                      fallback.innerHTML = '<svg class="text-champagne" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 6v6"/><path d="M15 6v6"/><path d="M2 12h19.6"/><path d="M18 18h2.4a.6.6 0 0 0 .6-.6V12a4 4 0 0 0-4-4h-3"/><circle cx="7" cy="18" r="2"/><path d="M15 18H9"/><circle cx="17" cy="18" r="2"/></svg>';
                       target.parentNode?.insertBefore(fallback, target);
                     }}
                   />
