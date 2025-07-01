@@ -1,21 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ShoppingCart, 
-  Search, 
-  Filter,
-  Grid,
-  List,
-  Star,
-  Shield,
-  Truck,
-  Heart,
-  Eye,
-  ChevronDown,
-  X,
-  Plus,
-  Minus,
-  CheckCircle
-} from 'lucide-react';
+import { ShoppingCart, Search, Filter, Grid, List, Star, Shield, Truck, Heart, Eye, ChevronDown, X, Plus, Minus, CheckCircle, Tag, Clock, MapPin, Zap, Settings, PenTool as Tool } from 'lucide-react';
 import { PartsService } from '../services/partsService';
 import { useAuth } from '../hooks/useAuth';
 import type { Part } from '../lib/supabase';
@@ -50,6 +34,9 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
   const [categories, setCategories] = useState<string[]>([]);
   const [brands, setBrands] = useState<string[]>([]);
   const [compatibleVehicles, setCompatibleVehicles] = useState<string[]>([]);
+  const [featuredParts, setFeaturedParts] = useState<Part[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [showPartDetails, setShowPartDetails] = useState<string | null>(null);
   
   const [filters, setFilters] = useState<Filters>({
     category: '',
@@ -74,19 +61,35 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
     try {
       setLoading(true);
       
-      const [partsData, categoriesData, brandsData, vehiclesData] = await Promise.all([
+      const [partsData, categoriesData, brandsData, vehiclesData, featuredData] = await Promise.all([
         PartsService.getParts(),
         PartsService.getCategories(),
         PartsService.getBrands(),
-        PartsService.getCompatibleVehicles()
+        PartsService.getCompatibleVehicles(),
+        PartsService.getFeaturedParts(6)
       ]);
       
       setParts(partsData);
       setCategories(categoriesData);
       setBrands(brandsData);
       setCompatibleVehicles(vehiclesData);
+      setFeaturedParts(featuredData);
     } catch (error) {
       console.error('Error loading marketplace data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loadPartsByCategory = async (category: string) => {
+    try {
+      setLoading(true);
+      const categoryParts = await PartsService.getPartsByCategory(category);
+      setParts(categoryParts);
+      setSelectedCategory(category);
+      setFilters({...filters, category});
+    } catch (error) {
+      console.error('Error loading parts by category:', error);
     } finally {
       setLoading(false);
     }
@@ -309,10 +312,56 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
       
       <div className="container mx-auto px-4 py-8 relative depth-2">
         <h1 className="text-4xl font-bold text-center text-luxury uppercase tracking-wider mb-4 relative">
-          Ultra-Premium Parts Marketplace
+          ULTRA-PREMIUM SPEED SHOP
           <div className="absolute bottom-[-10px] left-1/2 transform -translate-x-1/2 w-32 h-1 bg-gradient-to-r from-transparent via-champagne to-transparent"></div>
         </h1>
-        <p className="text-center text-gray-300 mb-12 text-lg">Live automotive database with blockchain verification</p>
+        <p className="text-center text-gray-300 mb-12 text-lg">Comprehensive Performance Parts Catalog with Blockchain Verification</p>
+
+        {/* Featured Categories */}
+        <div className="mb-12">
+          <h2 className="text-2xl font-bold text-luxury mb-6">Shop By Category</h2>
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            {categories.slice(0, 6).map(category => (
+              <button 
+                key={category}
+                onClick={() => loadPartsByCategory(category)}
+                className={`glass-card p-6 rounded-xl text-center glass-hover ${
+                  selectedCategory === category ? 'border-champagne bg-champagne/20' : ''
+                }`}
+              >
+                <div className="mb-3">
+                  {category === 'Engine' && <Zap size={32} className="mx-auto text-champagne" />}
+                  {category === 'Suspension' && <Settings size={32} className="mx-auto text-champagne" />}
+                  {category === 'Brakes' && <Tool size={32} className="mx-auto text-champagne" />}
+                  {category === 'Exhaust' && <Truck size={32} className="mx-auto text-champagne" />}
+                  {category === 'Exterior' && <Eye size={32} className="mx-auto text-champagne" />}
+                  {category === 'Wheels' && <Clock size={32} className="mx-auto text-champagne" />}
+                  {!['Engine', 'Suspension', 'Brakes', 'Exhaust', 'Exterior', 'Wheels'].includes(category) && 
+                    <Tag size={32} className="mx-auto text-champagne" />
+                  }
+                </div>
+                <span className="text-white font-medium">{category}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Featured Products */}
+        {!selectedCategory && !searchTerm && !filters.brand && !filters.compatibility && (
+          <div className="mb-12">
+            <h2 className="text-2xl font-bold text-luxury mb-6">Featured Products</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {featuredParts.map(part => (
+                <PartCard 
+                  key={part.id} 
+                  part={part} 
+                  onAddToCart={addToCart}
+                  onViewDetails={() => setShowPartDetails(part.id)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Premium Search and Controls */}
         <div className="mb-8">
@@ -394,7 +443,20 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
             <div className="mb-6 flex justify-between items-center">
               <p className="text-gray-300 text-lg">
                 Showing <span className="text-champagne font-bold">{filteredParts.length}</span> of <span className="text-champagne font-bold">{parts.length}</span> premium parts
+                {selectedCategory && <span> in <span className="text-champagne font-bold">{selectedCategory}</span></span>}
               </p>
+              {selectedCategory && (
+                <button 
+                  onClick={() => {
+                    setSelectedCategory('');
+                    setFilters({...filters, category: ''});
+                    loadInitialData();
+                  }}
+                  className="text-champagne hover:text-champagne-light text-sm"
+                >
+                  Clear Category Filter
+                </button>
+              )}
             </div>
 
             {viewMode === 'grid' ? (
@@ -403,7 +465,8 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
                   <PartCard 
                     key={part.id} 
                     part={part} 
-                    onAddToCart={addToCart} 
+                    onAddToCart={addToCart}
+                    onViewDetails={() => setShowPartDetails(part.id)}
                   />
                 ))}
               </div>
@@ -413,7 +476,8 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
                   <PartListItem 
                     key={part.id} 
                     part={part} 
-                    onAddToCart={addToCart} 
+                    onAddToCart={addToCart}
+                    onViewDetails={() => setShowPartDetails(part.id)}
                   />
                 ))}
               </div>
@@ -434,6 +498,8 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
                         verified: false
                       });
                       setSearchTerm('');
+                      setSelectedCategory('');
+                      loadInitialData();
                     }}
                     className="btn-luxury px-8 py-3 rounded-xl"
                   >
@@ -458,6 +524,15 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
           </div>
         </div>
       </div>
+
+      {/* Part Details Modal */}
+      {showPartDetails && (
+        <PartDetailsModal 
+          partId={showPartDetails} 
+          onClose={() => setShowPartDetails(null)}
+          onAddToCart={addToCart}
+        />
+      )}
     </div>
   );
 };
@@ -466,7 +541,8 @@ const FunctionalMarketplace: React.FC<FunctionalMarketplaceProps> = ({ onBlockch
 const PartCard: React.FC<{
   part: Part;
   onAddToCart: (part: Part, quantity: number) => void;
-}> = ({ part, onAddToCart }) => {
+  onViewDetails: () => void;
+}> = ({ part, onAddToCart, onViewDetails }) => {
   return (
     <div className="glass-marketplace-card rounded-xl overflow-hidden glass-hover float-element">
       <div className="h-56 overflow-hidden relative">
@@ -490,6 +566,14 @@ const PartCard: React.FC<{
             </span>
           )}
         </div>
+
+        {/* Quick View Button */}
+        <button 
+          onClick={onViewDetails}
+          className="absolute bottom-4 right-4 glass-card p-2 rounded-full hover:bg-white/10 transition-colors"
+        >
+          <Eye size={18} className="text-white" />
+        </button>
 
         {/* Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
@@ -547,16 +631,23 @@ const PartCard: React.FC<{
 const PartListItem: React.FC<{
   part: Part;
   onAddToCart: (part: Part, quantity: number) => void;
-}> = ({ part, onAddToCart }) => {
+  onViewDetails: () => void;
+}> = ({ part, onAddToCart, onViewDetails }) => {
   return (
     <div className="glass-marketplace-card rounded-xl p-8 glass-hover">
       <div className="flex gap-8">
-        <div className="w-40 h-40 flex-shrink-0">
+        <div className="w-40 h-40 flex-shrink-0 relative">
           <img 
             src={part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
             alt={part.name} 
             className="w-full h-full object-cover rounded-lg"
           />
+          <button 
+            onClick={onViewDetails}
+            className="absolute bottom-2 right-2 glass-card p-2 rounded-full hover:bg-white/10 transition-colors"
+          >
+            <Eye size={16} className="text-white" />
+          </button>
         </div>
         
         <div className="flex-1">
@@ -882,6 +973,206 @@ const CartItem: React.FC<{
         >
           <X size={18} />
         </button>
+      </div>
+    </div>
+  );
+};
+
+// Part Details Modal
+const PartDetailsModal: React.FC<{
+  partId: string;
+  onClose: () => void;
+  onAddToCart: (part: Part, quantity: number) => void;
+}> = ({ partId, onClose, onAddToCart }) => {
+  const [part, setPart] = useState<Part | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [quantity, setQuantity] = useState(1);
+  const [relatedParts, setRelatedParts] = useState<Part[]>([]);
+  
+  useEffect(() => {
+    const loadPartDetails = async () => {
+      try {
+        setLoading(true);
+        const partData = await PartsService.getPartById(partId);
+        setPart(partData);
+        
+        if (partData) {
+          const related = await PartsService.getRelatedParts(partId, partData.category);
+          setRelatedParts(related);
+        }
+      } catch (error) {
+        console.error('Error loading part details:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadPartDetails();
+  }, [partId]);
+  
+  if (loading || !part) {
+    return (
+      <div className="fixed inset-0 glass-modal flex items-center justify-center z-50">
+        <div className="glass-modal-content rounded-xl p-8 w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+          <div className="text-center py-12">
+            <div className="animate-spin w-12 h-12 border-4 border-champagne border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-300">Loading part details...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="fixed inset-0 glass-modal flex items-center justify-center z-50">
+      <div className="glass-modal-content rounded-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+        <div className="p-8">
+          <div className="flex justify-between items-start mb-8">
+            <h2 className="text-3xl font-bold text-luxury">{part.name}</h2>
+            <button 
+              onClick={onClose}
+              className="glass-card p-2 rounded-full hover:bg-white/10 transition-colors"
+            >
+              <X size={24} className="text-white" />
+            </button>
+          </div>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div>
+              <div className="glass-card rounded-xl overflow-hidden mb-4">
+                <img 
+                  src={part.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
+                  alt={part.name} 
+                  className="w-full h-64 object-cover"
+                />
+              </div>
+              
+              {part.images && part.images.length > 1 && (
+                <div className="flex gap-2 overflow-x-auto pb-2">
+                  {part.images.map((img, index) => (
+                    <div key={index} className="glass-card rounded-lg overflow-hidden w-20 h-20 flex-shrink-0">
+                      <img src={img} alt={`${part.name} ${index + 1}`} className="w-full h-full object-cover" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+            
+            <div>
+              <div className="flex items-center mb-4">
+                <span className="text-champagne text-xl font-medium uppercase tracking-wider mr-4">{part.brand}</span>
+                {part.blockchain_verified && (
+                  <span className="glass-card px-3 py-1 rounded-full text-xs font-medium text-green-400 flex items-center">
+                    <Shield size={12} className="mr-1" />
+                    Blockchain Verified
+                  </span>
+                )}
+              </div>
+              
+              <div className="mb-6">
+                <div className="text-3xl font-bold text-luxury mb-2">${part.price.toFixed(2)}</div>
+                <div className="flex items-center">
+                  <span className={`text-sm ${part.stock_quantity > 0 ? 'text-green-400' : 'text-red-400'}`}>
+                    {part.stock_quantity > 0 ? `${part.stock_quantity} in stock` : 'Out of stock'}
+                  </span>
+                  <span className="mx-2 text-gray-500">|</span>
+                  <span className="text-sm text-gray-400">Part #: {part.part_number || 'N/A'}</span>
+                </div>
+              </div>
+              
+              <div className="glass-card rounded-lg p-4 mb-6">
+                <h3 className="text-lg font-medium text-white mb-3">Description</h3>
+                <p className="text-gray-300">{part.description}</p>
+              </div>
+              
+              {part.compatibility.length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-white mb-3">Compatible Vehicles</h3>
+                  <div className="flex flex-wrap gap-2">
+                    {part.compatibility.map((vehicle, index) => (
+                      <span key={index} className="glass-card px-3 py-1 rounded-lg text-sm text-champagne">
+                        {vehicle}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {part.specifications && Object.keys(part.specifications).length > 0 && (
+                <div className="mb-6">
+                  <h3 className="text-lg font-medium text-white mb-3">Specifications</h3>
+                  <div className="glass-card rounded-lg p-4">
+                    <table className="w-full">
+                      <tbody>
+                        {Object.entries(part.specifications).map(([key, value]) => (
+                          <tr key={key} className="border-b border-gray-700 last:border-0">
+                            <td className="py-2 text-gray-400 capitalize">{key.replace(/_/g, ' ')}</td>
+                            <td className="py-2 text-white text-right">{value}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+              
+              <div className="flex items-center gap-4">
+                <div className="glass-card rounded-lg p-1 flex items-center">
+                  <button 
+                    className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                    onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  >
+                    <Minus size={16} />
+                  </button>
+                  <span className="w-10 text-center text-lg font-medium">{quantity}</span>
+                  <button 
+                    className="w-10 h-10 flex items-center justify-center hover:bg-white/10 transition-colors"
+                    onClick={() => setQuantity(Math.min(part.stock_quantity, quantity + 1))}
+                    disabled={quantity >= part.stock_quantity}
+                  >
+                    <Plus size={16} />
+                  </button>
+                </div>
+                
+                <button
+                  className="flex-1 btn-luxury py-4 rounded-xl text-lg flex items-center justify-center font-medium"
+                  onClick={() => {
+                    onAddToCart(part, quantity);
+                    onClose();
+                  }}
+                  disabled={part.stock_quantity === 0}
+                >
+                  <ShoppingCart size={20} className="mr-2" />
+                  {part.stock_quantity === 0 ? 'Out of Stock' : 'Add to Cart'}
+                </button>
+              </div>
+            </div>
+          </div>
+          
+          {relatedParts.length > 0 && (
+            <div>
+              <h3 className="text-2xl font-bold text-luxury mb-6">Related Products</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                {relatedParts.map(relatedPart => (
+                  <div key={relatedPart.id} className="glass-card rounded-lg p-4">
+                    <div className="flex gap-4">
+                      <img 
+                        src={relatedPart.images?.[0] || 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg?auto=compress&cs=tinysrgb&w=600'} 
+                        alt={relatedPart.name} 
+                        className="w-16 h-16 object-cover rounded-lg"
+                      />
+                      <div>
+                        <h4 className="text-white font-medium">{relatedPart.name}</h4>
+                        <p className="text-champagne text-sm">{relatedPart.brand}</p>
+                        <p className="text-luxury font-bold mt-1">${relatedPart.price.toFixed(2)}</p>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
