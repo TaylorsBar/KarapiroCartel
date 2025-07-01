@@ -3,8 +3,7 @@ import { Car, Zap, ShoppingCart, Wrench, BarChart3, CreditCard, Menu, X, User, L
 import { useAuth } from './hooks/useAuth';
 import { useRevenueCat } from './hooks/useRevenueCat';
 import Dashboard from './components/Dashboard';
-import Marketplace from './components/Marketplace';
-import EnhancedMarketplace from './components/EnhancedMarketplace';
+import FunctionalMarketplace from './components/FunctionalMarketplace';
 import Diagnostics from './components/Diagnostics';
 import Workshop from './components/Workshop';
 import Analytics from './components/Analytics';
@@ -310,7 +309,7 @@ const App: React.FC = () => {
       {/* Main Content */}
       <main>
         {activeSection === 'dashboard' && <Dashboard onSectionChange={handleSectionChange} />}
-        {activeSection === 'marketplace' && <EnhancedMarketplace onBlockchainPayment={handleBlockchainPayment} />}
+        {activeSection === 'marketplace' && <FunctionalMarketplace onBlockchainPayment={handleBlockchainPayment} />}
         {activeSection === 'diagnostics' && <Diagnostics />}
         {activeSection === 'workshop' && <Workshop />}
         {activeSection === 'analytics' && <Analytics />}
