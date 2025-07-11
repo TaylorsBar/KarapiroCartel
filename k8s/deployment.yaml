@@ -1,0 +1,106 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: karapiro-cartel-app
+  namespace: karapiro-cartel
+  labels:
+    app: karapiro-cartel
+    component: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: karapiro-cartel
+      component: frontend
+  template:
+    metadata:
+      labels:
+        app: karapiro-cartel
+        component: frontend
+    spec:
+      containers:
+      - name: karapiro-cartel-frontend
+        image: karapiro-cartel:latest
+        ports:
+        - containerPort: 80
+          name: http
+        resources:
+          requests:
+            memory: "128Mi"
+            cpu: "100m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 5
+          timeoutSeconds: 3
+          failureThreshold: 3
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: REACT_APP_SUPABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: supabase-url
+        - name: REACT_APP_SUPABASE_ANON_KEY
+          valueFrom:
+            secretKeyRef:
+              name: app-secrets
+              key: supabase-anon-key
+      imagePullPolicy: Always
+      restartPolicy: Always
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: karapiro-cartel-service
+  namespace: karapiro-cartel
+  labels:
+    app: karapiro-cartel
+spec:
+  selector:
+    app: karapiro-cartel
+    component: frontend
+  ports:
+  - port: 80
+    targetPort: 80
+    protocol: TCP
+    name: http
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: karapiro-cartel-ingress
+  namespace: karapiro-cartel
+  annotations:
+    kubernetes.io/ingress.class: "alb"
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    alb.ingress.kubernetes.io/certificate-arn: "arn:aws:acm:us-east-1:ACCOUNT_ID:certificate/CERTIFICATE_ID"
+spec:
+  rules:
+  - host: karapiro-cartel.example.com
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: karapiro-cartel-service
+            port:
+              number: 80
