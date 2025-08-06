@@ -1,4 +1,5 @@
 import { supabase } from '../lib/supabase';
+import { PerplexityService, type DiagnosticContext, type AdvancedDiagnostic } from './perplexityService';
 import type { DiagnosticScan, AIInterpretation, Vehicle } from '../lib/supabase';
 
 export class DiagnosticService {
@@ -59,6 +60,117 @@ export class DiagnosticService {
 
     if (error && error.code !== 'PGRST116') throw error;
     return data;
+  }
+
+  static async createAdvancedDiagnosticScan(scanData: {
+    vehicle_id: string;
+    vin: string;
+    trouble_codes: string[];
+    symptoms: string[];
+    raw_data: Record<string, any>;
+    vehicle_info: {
+      make: string;
+      model: string;
+      year: number;
+      mileage: number;
+      engine?: string;
+      transmission?: string;
+    };
+  }): Promise<{
+    scan: DiagnosticScan;
+    basicInterpretation: AIInterpretation;
+    advancedDiagnostic: AdvancedDiagnostic;
+    vehicle: Vehicle;
+  }> {
+    try {
+      // Create basic diagnostic scan
+      const scan = await this.createDiagnosticScan({
+        vehicle_id: scanData.vehicle_id,
+        vin: scanData.vin,
+        trouble_codes: scanData.trouble_codes,
+        raw_data: scanData.raw_data,
+      });
+
+      // Get vehicle info
+      const vehicle = await this.getVehicleById(scanData.vehicle_id);
+      if (!vehicle) throw new Error('Vehicle not found');
+
+      // Generate basic AI interpretation
+      const basicInterpretation = await this.generateAIInterpretation(scan, vehicle);
+
+      // Get advanced diagnostic from Perplexity
+      const diagnosticContext: DiagnosticContext = {
+        vehicleInfo: scanData.vehicle_info,
+        troubleCodes: scanData.trouble_codes,
+        symptoms: scanData.symptoms,
+        environment: 'New Zealand roads, climate conditions'
+      };
+
+      const advancedDiagnostic = await PerplexityService.getAdvancedDiagnostic(diagnosticContext);
+
+      return {
+        scan,
+        basicInterpretation,
+        advancedDiagnostic,
+        vehicle
+      };
+    } catch (error) {
+      console.error('Error creating advanced diagnostic scan:', error);
+      throw error;
+    }
+  }
+
+  static async getSpecialistConsultation(
+    scanId: string,
+    specialization: 'engine' | 'transmission' | 'electrical' | 'suspension' | 'emissions'
+  ): Promise<string> {
+    try {
+      const scan = await this.getDiagnosticScanById(scanId);
+      if (!scan) throw new Error('Diagnostic scan not found');
+
+      const vehicle = await this.getVehicleById(scan.vehicle_id);
+      if (!vehicle) throw new Error('Vehicle not found');
+
+      const context: DiagnosticContext = {
+        vehicleInfo: {
+          make: vehicle.make,
+          model: vehicle.model,
+          year: vehicle.year,
+          mileage: vehicle.mileage,
+          engine: vehicle.engine,
+          transmission: vehicle.transmission
+        },
+        troubleCodes: scan.trouble_codes,
+        symptoms: [], // Would extract from scan raw_data
+      };
+
+      return await PerplexityService.getSpecialistConsultation(context, specialization);
+    } catch (error) {
+      console.error('Error getting specialist consultation:', error);
+      throw error;
+    }
+  }
+
+  static async getPartsMarketAnalysis(
+    partName: string,
+    vehicleId: string
+  ): Promise<any> {
+    try {
+      const vehicle = await this.getVehicleById(vehicleId);
+      if (!vehicle) throw new Error('Vehicle not found');
+
+      return await PerplexityService.getRealTimeMarketAnalysis(partName, {
+        make: vehicle.make,
+        model: vehicle.model,
+        year: vehicle.year,
+        mileage: vehicle.mileage,
+        engine: vehicle.engine,
+        transmission: vehicle.transmission
+      });
+    } catch (error) {
+      console.error('Error getting parts market analysis:', error);
+      throw error;
+    }
   }
 
   static async processOBD2Scan(scanData: {
@@ -133,6 +245,28 @@ export class DiagnosticService {
       console.error('Error processing OBD2 scan:', error);
       throw error;
     }
+  }
+
+  private static async getDiagnosticScanById(scanId: string): Promise<DiagnosticScan | null> {
+    const { data, error } = await supabase
+      .from('diagnostic_scans')
+      .select('*')
+      .eq('id', scanId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
+  }
+
+  private static async getVehicleById(vehicleId: string): Promise<Vehicle | null> {
+    const { data, error } = await supabase
+      .from('vehicles')
+      .select('*')
+      .eq('id', vehicleId)
+      .single();
+
+    if (error && error.code !== 'PGRST116') throw error;
+    return data;
   }
 
   private static async generateAIInterpretation(

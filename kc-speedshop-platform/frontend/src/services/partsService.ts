@@ -8,6 +8,7 @@ export class PartsService {
     search?: string;
     minPrice?: number;
     maxPrice?: number;
+    compatibility?: string;
   }): Promise<Part[]> {
     let query = supabase
       .from('parts')
@@ -24,7 +25,7 @@ export class PartsService {
     }
 
     if (filters?.search) {
-      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%`);
+      query = query.or(`name.ilike.%${filters.search}%,description.ilike.%${filters.search}%,brand.ilike.%${filters.search}%`);
     }
 
     if (filters?.minPrice) {
@@ -33,6 +34,10 @@ export class PartsService {
 
     if (filters?.maxPrice) {
       query = query.lte('price', filters.maxPrice);
+    }
+
+    if (filters?.compatibility) {
+      query = query.contains('compatibility', [filters.compatibility]);
     }
 
     const { data, error } = await query.order('created_at', { ascending: false });
@@ -120,7 +125,34 @@ export class PartsService {
 
     if (itemsError) throw itemsError;
 
+    // Update stock quantities
+    for (const item of orderData.items) {
+      await this.updateStock(item.part_id, -item.quantity);
+    }
+
     return { order, items: items || [] };
+  }
+
+  static async updateStock(partId: string, quantityChange: number): Promise<void> {
+    const { data: part, error: fetchError } = await supabase
+      .from('parts')
+      .select('stock_quantity')
+      .eq('id', partId)
+      .single();
+
+    if (fetchError) throw fetchError;
+
+    const newQuantity = Math.max(0, part.stock_quantity + quantityChange);
+
+    const { error: updateError } = await supabase
+      .from('parts')
+      .update({ 
+        stock_quantity: newQuantity,
+        status: newQuantity === 0 ? 'out_of_stock' : 'active'
+      })
+      .eq('id', partId);
+
+    if (updateError) throw updateError;
   }
 
   static async getUserOrders(userId: string): Promise<Order[]> {
@@ -173,5 +205,72 @@ export class PartsService {
     
     const brands = [...new Set(data?.map(item => item.brand) || [])];
     return brands.sort();
+  }
+
+  static async getCompatibleVehicles(): Promise<string[]> {
+    const { data, error } = await supabase
+      .from('parts')
+      .select('compatibility')
+      .eq('status', 'active');
+
+    if (error) throw error;
+    
+    const allCompatibility = data?.flatMap(item => item.compatibility || []) || [];
+    const uniqueVehicles = [...new Set(allCompatibility)];
+    return uniqueVehicles.sort();
+  }
+
+  static async searchParts(searchTerm: string, limit: number = 10): Promise<Part[]> {
+    const { data, error } = await supabase
+      .from('parts')
+      .select('*')
+      .eq('status', 'active')
+      .or(`name.ilike.%${searchTerm}%,brand.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,part_number.ilike.%${searchTerm}%`)
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getFeaturedParts(limit: number = 6): Promise<Part[]> {
+    const { data, error } = await supabase
+      .from('parts')
+      .select('*')
+      .eq('status', 'active')
+      .eq('blockchain_verified', true)
+      .gt('stock_quantity', 0)
+      .order('created_at', { ascending: false })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getPartsByCategory(category: string, limit: number = 12): Promise<Part[]> {
+    const { data, error } = await supabase
+      .from('parts')
+      .select('*')
+      .eq('status', 'active')
+      .eq('category', category)
+      .gt('stock_quantity', 0)
+      .order('price', { ascending: true })
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
+  }
+
+  static async getRelatedParts(partId: string, category: string, limit: number = 4): Promise<Part[]> {
+    const { data, error } = await supabase
+      .from('parts')
+      .select('*')
+      .eq('status', 'active')
+      .eq('category', category)
+      .neq('id', partId)
+      .gt('stock_quantity', 0)
+      .limit(limit);
+
+    if (error) throw error;
+    return data || [];
   }
 }

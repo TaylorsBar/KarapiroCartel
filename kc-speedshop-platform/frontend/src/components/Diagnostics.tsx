@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
-import { Wrench, AlertTriangle, CheckCircle, Info, ArrowRight, Cpu, Database, Car } from 'lucide-react';
+import { Wrench, AlertTriangle, CheckCircle, Info, ArrowRight, Cpu, Database, Car, Brain, Zap, TrendingUp, DollarSign, Calendar, Users } from 'lucide-react';
+import { DiagnosticService } from '../services/diagnosticService';
+import { PerplexityService, type AdvancedDiagnostic } from '../services/perplexityService';
+import { useAuth } from '../hooks/useAuth';
 
 const Diagnostics: React.FC = () => {
+  const { user } = useAuth();
   const [vehicleMake, setVehicleMake] = useState<string>('');
   const [vehicleModel, setVehicleModel] = useState<string>('');
   const [vehicleYear, setVehicleYear] = useState<string>('');
@@ -10,6 +14,10 @@ const Diagnostics: React.FC = () => {
   const [symptoms, setSymptoms] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [diagnosticResult, setDiagnosticResult] = useState<any>(null);
+  const [advancedDiagnostic, setAdvancedDiagnostic] = useState<AdvancedDiagnostic | null>(null);
+  const [specialist, setSpecialist] = useState<string>('');
+  const [loadingAdvanced, setLoadingAdvanced] = useState<boolean>(false);
+  const [loadingSpecialist, setLoadingSpecialist] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<string>('scan');
 
   const popularMakes = [
@@ -55,44 +63,130 @@ const Diagnostics: React.FC = () => {
   const handleScan = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setAdvancedDiagnostic(null);
+    setSpecialist('');
     
     try {
-      // Simulate API call to diagnostic service
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      // Generate more realistic results based on vehicle make and symptoms
-      const mockResult = {
-        vehicle: {
+      if (user) {
+        // Use real DiagnosticService for authenticated users
+        const result = await DiagnosticService.processOBD2Scan({
+          vin: `DEMO${vehicleMake}${vehicleModel}${vehicleYear}`,
+          trouble_codes: [troubleCode],
+          mileage: parseInt(mileage),
+          year: parseInt(vehicleYear),
+        });
+        
+        setDiagnosticResult({
+          vehicle: {
+            make: vehicleMake,
+            model: vehicleModel,
+            year: parseInt(vehicleYear),
+            mileage: parseInt(mileage)
+          },
+          diagnosticResults: {
+            troubleCodes: [troubleCode],
+            description: getCodeDescription(troubleCode),
+            possibleCauses: getPossibleCauses(troubleCode, vehicleMake),
+            symptoms: symptoms
+          },
+          aiInterpretation: result.interpretation,
+          blockchainRecord: {
+            status: 'recorded',
+            transactionId: `txn_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+            consensusTimestamp: new Date().toISOString()
+          },
+          recommendations: getRecommendations(troubleCode, vehicleMake, symptoms)
+        });
+      } else {
+        // Fallback to mock results for non-authenticated users
+        await new Promise(resolve => setTimeout(resolve, 2000));
+        
+        const mockResult = {
+          vehicle: {
+            make: vehicleMake,
+            model: vehicleModel,
+            year: parseInt(vehicleYear),
+            mileage: parseInt(mileage)
+          },
+          diagnosticResults: {
+            troubleCodes: [troubleCode],
+            description: getCodeDescription(troubleCode),
+            possibleCauses: getPossibleCauses(troubleCode, vehicleMake),
+            symptoms: symptoms
+          },
+          aiInterpretation: {
+            interpretation: generateAIInterpretation(troubleCode, vehicleMake, vehicleModel, symptoms),
+            confidence: Math.floor(Math.random() * 20) + 75,
+            urgencyLevel: getUrgencyLevel(troubleCode),
+            estimatedCost: getEstimatedCost(troubleCode, vehicleMake)
+          },
+          blockchainRecord: {
+            status: 'recorded',
+            transactionId: `txn_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+            consensusTimestamp: new Date().toISOString()
+          },
+          recommendations: getRecommendations(troubleCode, vehicleMake, symptoms)
+        };
+        
+        setDiagnosticResult(mockResult);
+      }
+    } catch (error) {
+      console.error('Error during diagnostic scan:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleAdvancedAnalysis = async () => {
+    if (!diagnosticResult) return;
+    
+    setLoadingAdvanced(true);
+    try {
+      const context = {
+        vehicleInfo: {
           make: vehicleMake,
           model: vehicleModel,
           year: parseInt(vehicleYear),
           mileage: parseInt(mileage)
         },
-        diagnosticResults: {
-          troubleCodes: [troubleCode],
-          description: getCodeDescription(troubleCode),
-          possibleCauses: getPossibleCauses(troubleCode, vehicleMake),
-          symptoms: symptoms
-        },
-        aiInterpretation: {
-          interpretation: generateAIInterpretation(troubleCode, vehicleMake, vehicleModel, symptoms),
-          confidence: Math.floor(Math.random() * 20) + 75, // 75-95%
-          urgencyLevel: getUrgencyLevel(troubleCode),
-          estimatedCost: getEstimatedCost(troubleCode, vehicleMake)
-        },
-        blockchainRecord: {
-          status: 'recorded',
-          transactionId: `txn_${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
-          consensusTimestamp: new Date().toISOString()
-        },
-        recommendations: getRecommendations(troubleCode, vehicleMake, symptoms)
+        troubleCodes: [troubleCode],
+        symptoms: symptoms,
+        environment: 'New Zealand roads, climate conditions'
       };
-      
-      setDiagnosticResult(mockResult);
+
+      const advanced = await PerplexityService.getAdvancedDiagnostic(context);
+      setAdvancedDiagnostic(advanced);
     } catch (error) {
-      console.error('Error during diagnostic scan:', error);
+      console.error('Error getting advanced analysis:', error);
+      alert('Advanced analysis requires Perplexity API configuration');
     } finally {
-      setIsLoading(false);
+      setLoadingAdvanced(false);
+    }
+  };
+
+  const handleSpecialistConsultation = async (specialization: 'engine' | 'transmission' | 'electrical' | 'suspension' | 'emissions') => {
+    if (!diagnosticResult) return;
+    
+    setLoadingSpecialist(true);
+    try {
+      const context = {
+        vehicleInfo: {
+          make: vehicleMake,
+          model: vehicleModel,
+          year: parseInt(vehicleYear),
+          mileage: parseInt(mileage)
+        },
+        troubleCodes: [troubleCode],
+        symptoms: symptoms
+      };
+
+      const consultation = await PerplexityService.getSpecialistConsultation(context, specialization);
+      setSpecialist(consultation);
+    } catch (error) {
+      console.error('Error getting specialist consultation:', error);
+      alert('Specialist consultation requires Perplexity API configuration');
+    } finally {
+      setLoadingSpecialist(false);
     }
   };
 
@@ -549,6 +643,43 @@ const Diagnostics: React.FC = () => {
           <div className="mt-12 glass-diagnostic-card rounded-xl p-8 shadow-2xl depth-3">
             <h2 className="text-3xl font-bold mb-8 text-center text-luxury">AI Diagnostic Results</h2>
             
+            {/* Advanced Analysis Button */}
+            <div className="mb-8 text-center">
+              <button
+                onClick={handleAdvancedAnalysis}
+                disabled={loadingAdvanced}
+                className="btn-luxury px-8 py-4 rounded-xl text-lg font-medium mr-4"
+              >
+                {loadingAdvanced ? (
+                  <>
+                    <span className="animate-spin mr-3">🧠</span>
+                    Running Perplexity Analysis...
+                  </>
+                ) : (
+                  <>
+                    <Brain size={20} className="mr-3" />
+                    Get Advanced Perplexity Analysis
+                  </>
+                )}
+              </button>
+              
+              {/* Specialist Consultation Buttons */}
+              {advancedDiagnostic && (
+                <div className="mt-4 flex flex-wrap justify-center gap-2">
+                  {['engine', 'transmission', 'electrical', 'suspension', 'emissions'].map((spec) => (
+                    <button
+                      key={spec}
+                      onClick={() => handleSpecialistConsultation(spec as any)}
+                      disabled={loadingSpecialist}
+                      className="glass-card px-4 py-2 rounded-lg text-sm hover:bg-white/10 transition-all"
+                    >
+                      {spec.charAt(0).toUpperCase() + spec.slice(1)} Specialist
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
               <div className="glass-card p-6 rounded-lg">
                 <h3 className="text-xl font-semibold mb-4 text-glow">Vehicle Information</h3>
@@ -632,6 +763,136 @@ const Diagnostics: React.FC = () => {
               </div>
             </div>
             
+            {/* Advanced Perplexity Analysis Results */}
+            {advancedDiagnostic && (
+              <div className="mt-8 space-y-8">
+                <div className="glass-card p-8 rounded-lg border-2 border-purple-600/30">
+                  <h3 className="text-2xl font-bold mb-6 flex items-center text-purple-400">
+                    <Brain className="mr-3" size={24} />
+                    Advanced Perplexity Analysis
+                    <span className="ml-auto text-sm bg-purple-600/20 text-purple-400 px-3 py-1 rounded-full">
+                      Confidence: {advancedDiagnostic.confidenceScore}%
+                    </span>
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-4">Root Cause Analysis</h4>
+                      <p className="text-gray-300 mb-6 leading-relaxed">{advancedDiagnostic.rootCauseAnalysis}</p>
+                      
+                      <h4 className="text-lg font-semibold text-white mb-4">Safety Considerations</h4>
+                      <ul className="space-y-2 text-gray-300">
+                        {advancedDiagnostic.safetyConsiderations.map((safety, index) => (
+                          <li key={index} className="flex items-start">
+                            <AlertTriangle size={16} className="text-red-500 mr-2 mt-1 flex-shrink-0" />
+                            <span>{safety}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-4">Detailed Cost Breakdown</h4>
+                      <div className="glass-card p-4 rounded-lg mb-6">
+                        <div className="space-y-3">
+                          {advancedDiagnostic.estimatedCost.breakdown.map((item, index) => (
+                            <div key={index} className="flex justify-between items-center">
+                              <span className="text-gray-400">{item.component}</span>
+                              <div className="text-right">
+                                <div className="text-white font-medium">
+                                  ${item.cost.toFixed(2)} + ${item.labor.toFixed(2)} labor
+                                </div>
+                                <div className="text-xs text-gray-500">
+                                  Total: ${(item.cost + item.labor).toFixed(2)}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                          <div className="border-t border-gray-700 pt-3">
+                            <div className="flex justify-between items-center font-bold text-lg">
+                              <span className="text-white">Total Range:</span>
+                              <span className="text-purple-400">
+                                ${advancedDiagnostic.estimatedCost.min} - ${advancedDiagnostic.estimatedCost.max} {advancedDiagnostic.estimatedCost.currency}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <h4 className="text-lg font-semibold text-white mb-4">Repair Priority</h4>
+                      <div className="space-y-3">
+                        {advancedDiagnostic.repairPriority.map((repair, index) => (
+                          <div key={index} className="glass-card p-4 rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <span className="font-medium text-white">{repair.task}</span>
+                              <span className="bg-purple-600/20 text-purple-400 px-2 py-1 rounded-full text-xs">
+                                Priority {repair.priority}
+                              </span>
+                            </div>
+                            <p className="text-sm text-gray-400 mb-2">{repair.reasoning}</p>
+                            <p className="text-xs text-gray-500">Timeline: {repair.timeframe}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-4">Parts Recommendations</h4>
+                      <div className="space-y-3">
+                        {advancedDiagnostic.partRecommendations.map((part, index) => (
+                          <div key={index} className="glass-card p-4 rounded-lg">
+                            <div className="flex justify-between items-start mb-2">
+                              <div>
+                                <span className="font-medium text-white">{part.partName}</span>
+                                <p className="text-sm text-gray-400">{part.brand} - #{part.partNumber}</p>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-white font-medium">${part.price.toFixed(2)}</div>
+                                <span className={`text-xs px-2 py-1 rounded-full ${
+                                  part.necessity === 'critical' ? 'bg-red-600/20 text-red-400' :
+                                  part.necessity === 'recommended' ? 'bg-yellow-600/20 text-yellow-400' :
+                                  'bg-green-600/20 text-green-400'
+                                }`}>
+                                  {part.necessity}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                    
+                    <div>
+                      <h4 className="text-lg font-semibold text-white mb-4">Preventive Maintenance</h4>
+                      <ul className="space-y-2 text-gray-300">
+                        {advancedDiagnostic.preventiveMaintenance.map((maintenance, index) => (
+                          <li key={index} className="flex items-start">
+                            <CheckCircle size={16} className="text-green-500 mr-2 mt-1 flex-shrink-0" />
+                            <span>{maintenance}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Specialist Consultation Results */}
+            {specialist && (
+              <div className="mt-8 glass-card p-8 rounded-lg border-2 border-blue-600/30">
+                <h3 className="text-2xl font-bold mb-6 flex items-center text-blue-400">
+                  <Users className="mr-3" size={24} />
+                  Specialist Consultation
+                </h3>
+                <div className="prose prose-invert max-w-none">
+                  <p className="text-gray-300 leading-relaxed whitespace-pre-wrap">{specialist}</p>
+                </div>
+              </div>
+            )}
+
             <div className="glass-card p-6 rounded-lg">
               <h3 className="text-xl font-semibold mb-4 flex items-center text-glow">
                 <Database className="mr-3 text-champagne" size={20} />

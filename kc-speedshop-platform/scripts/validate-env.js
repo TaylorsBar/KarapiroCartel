@@ -8,6 +8,9 @@
 const fs = require('fs');
 const path = require('path');
 
+// Load environment variables from .env file
+require('dotenv').config();
+
 // Define required environment variables by environment
 const requiredEnvVars = {
     development: [
@@ -138,8 +141,8 @@ function validateEnvironment() {
         invalid.push({ varName: 'JWT_SECRET', error: 'Must be at least 32 characters long' });
     }
     
-    if (process.env.CORS_ORIGIN && !validators.url(process.env.CORS_ORIGIN)) {
-        invalid.push({ varName: 'CORS_ORIGIN', error: 'Must be a valid URL' });
+    if (process.env.CORS_ORIGIN && validators.url(process.env.CORS_ORIGIN)) {
+        invalid.push({ varName: 'CORS_ORIGIN', error: validators.url(process.env.CORS_ORIGIN) });
     }
     
     // Security warnings

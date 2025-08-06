@@ -85,5 +85,8 @@
   "bugs": {
     "url": "https://github.com/KCSpeedshop/kc-speedshop-platform/issues"
   },
-  "homepage": "https://kcspeedshop.ai"
+  "homepage": "https://kcspeedshop.ai",
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
 }
