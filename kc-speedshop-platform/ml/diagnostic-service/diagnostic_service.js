@@ -16,16 +16,8 @@ class DiagnosticService {
         this.setupLogging();
 
         // API Configurations
-        this.rapidApiKey = process.env.RAPIDAPI_KEY;
-        this.xaiApiKey = process.env.XAI_API_KEY;
-        
-        // Validate required environment variables
-        if (!this.rapidApiKey) {
-            throw new Error('RAPIDAPI_KEY environment variable is required');
-        }
-        if (!this.xaiApiKey) {
-            throw new Error('XAI_API_KEY environment variable is required');
-        }
+        this.rapidApiKey = process.env.RAPIDAPI_KEY || '7df876ef79msh8d28c0ec51fe3dcp1da291jsne6dae8edcea0';
+        this.xaiApiKey = process.env.XAI_API_KEY || 'xai-0c9FSzM8WPoRTlEbOSOQLrpgU5Xwq4TcRszdVTXiNpGBri9GbUicoZ2UyGShBNQuklg70iUbWWQ74PZH';
         this.xaiBaseUrl = 'https://api.x.ai/v1';
 
         // Hedera Configuration
