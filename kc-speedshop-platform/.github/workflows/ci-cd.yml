@@ -1,0 +1,373 @@
+name: KC Speedshop Platform CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: kc-speedshop/platform
+
+jobs:
+  # === LINT AND VALIDATE ===
+  lint-and-validate:
+    runs-on: ubuntu-latest
+    name: Lint and Validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Environment validation
+        run: |
+          cp .env.example .env
+          npm run validate:env
+
+      - name: Lint frontend
+        run: npm run lint:frontend
+
+      - name: Lint backend
+        run: npm run lint:backend
+
+      - name: Format check
+        run: npm run format
+
+  # === FRONTEND TESTS ===
+  test-frontend:
+    runs-on: ubuntu-latest
+    name: Frontend Tests
+    needs: lint-and-validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd frontend && npm install
+
+      - name: Run frontend tests
+        run: npm run test:frontend
+
+      - name: Build frontend
+        run: npm run build:frontend
+        env:
+          VITE_API_URL: https://api.kcspeedshop.ai
+          VITE_SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+
+  # === BACKEND TESTS ===
+  test-backend:
+    runs-on: ubuntu-latest
+    name: Backend Tests
+    needs: lint-and-validate
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_PASSWORD: test_password
+          POSTGRES_USER: test_user
+          POSTGRES_DB: test_db
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          npm install
+          cd backend && npm install
+
+      - name: Setup test database
+        run: |
+          cd backend
+          npm run db:migrate
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-key-for-testing-only-32-chars
+
+      - name: Run backend tests
+        run: npm run test:backend
+        env:
+          DATABASE_URL: postgresql://test_user:test_password@localhost:5432/test_db
+          REDIS_URL: redis://localhost:6379
+          NODE_ENV: test
+          JWT_SECRET: test-jwt-secret-key-for-testing-only-32-chars
+
+  # === ML SERVICE TESTS ===
+  test-ml-service:
+    runs-on: ubuntu-latest
+    name: ML Service Tests
+    needs: lint-and-validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Python dependencies
+        run: |
+          cd ml/diagnostic-service
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run ML service tests
+        run: npm run test:ml
+        env:
+          XAI_API_KEY: ${{ secrets.XAI_API_KEY }}
+          RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+
+  # === SECURITY SCAN ===
+  security-scan:
+    runs-on: ubuntu-latest
+    name: Security Scan
+    needs: lint-and-validate
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm run install:all
+
+      - name: Run security audit
+        run: npm run security:scan
+
+      - name: Run Snyk security scan
+        uses: snyk/actions/node@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          args: --severity-threshold=high
+
+  # === BUILD IMAGES ===
+  build-images:
+    runs-on: ubuntu-latest
+    name: Build Docker Images
+    needs: [test-frontend, test-backend, test-ml-service, security-scan]
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    permissions:
+      contents: read
+      packages: write
+    outputs:
+      frontend-image: ${{ steps.meta-frontend.outputs.tags }}
+      backend-image: ${{ steps.meta-backend.outputs.tags }}
+      ml-image: ${{ steps.meta-ml.outputs.tags }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Log in to Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build Frontend
+      - name: Extract metadata for frontend
+        id: meta-frontend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-frontend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./frontend
+          push: true
+          tags: ${{ steps.meta-frontend.outputs.tags }}
+          labels: ${{ steps.meta-frontend.outputs.labels }}
+
+      # Build Backend
+      - name: Extract metadata for backend
+        id: meta-backend
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-backend
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./backend
+          push: true
+          tags: ${{ steps.meta-backend.outputs.tags }}
+          labels: ${{ steps.meta-backend.outputs.labels }}
+
+      # Build ML Service
+      - name: Extract metadata for ML service
+        id: meta-ml
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}-ml
+          tags: |
+            type=ref,event=branch
+            type=ref,event=pr
+            type=sha
+
+      - name: Build and push ML service image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./ml/diagnostic-service
+          push: true
+          tags: ${{ steps.meta-ml.outputs.tags }}
+          labels: ${{ steps.meta-ml.outputs.labels }}
+
+  # === DEPLOY TO STAGING ===
+  deploy-staging:
+    runs-on: ubuntu-latest
+    name: Deploy to Staging
+    needs: build-images
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name kc-speedshop-staging
+
+      - name: Deploy to staging
+        run: |
+          cd infrastructure/k8s
+          envsubst < deployment.yaml | kubectl apply -f -
+          kubectl rollout status deployment/kc-speedshop-app -n kc-speedshop-staging
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          ENVIRONMENT: staging
+
+      - name: Run health checks
+        run: |
+          kubectl get pods -n kc-speedshop-staging
+          kubectl wait --for=condition=ready pod -l app=kc-speedshop -n kc-speedshop-staging --timeout=300s
+
+  # === DEPLOY TO PRODUCTION ===
+  deploy-production:
+    runs-on: ubuntu-latest
+    name: Deploy to Production
+    needs: build-images
+    if: github.ref == 'refs/heads/main'
+    environment: production
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Update kubeconfig
+        run: |
+          aws eks update-kubeconfig --region ${{ secrets.AWS_REGION }} --name kc-speedshop-production
+
+      - name: Deploy to production
+        run: |
+          cd infrastructure/k8s
+          envsubst < deployment.yaml | kubectl apply -f -
+          kubectl rollout status deployment/kc-speedshop-app -n kc-speedshop-production
+        env:
+          IMAGE_TAG: ${{ github.sha }}
+          ENVIRONMENT: production
+
+      - name: Run health checks
+        run: |
+          kubectl get pods -n kc-speedshop-production
+          kubectl wait --for=condition=ready pod -l app=kc-speedshop -n kc-speedshop-production --timeout=300s
+
+      - name: Post-deployment tests
+        run: |
+          # Run smoke tests against production
+          curl -f https://api.kcspeedshop.ai/health || exit 1
+          curl -f https://kcspeedshop.ai || exit 1
+
+  # === NOTIFY ===
+  notify:
+    runs-on: ubuntu-latest
+    name: Notify Deployment
+    needs: [deploy-staging, deploy-production]
+    if: always()
+    steps:
+      - name: Notify success
+        if: needs.deploy-production.result == 'success' || needs.deploy-staging.result == 'success'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: success
+          text: "KC Speedshop Platform deployed successfully!"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+      - name: Notify failure
+        if: needs.deploy-production.result == 'failure' || needs.deploy-staging.result == 'failure'
+        uses: 8398a7/action-slack@v3
+        with:
+          status: failure
+          text: "KC Speedshop Platform deployment failed!"
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
