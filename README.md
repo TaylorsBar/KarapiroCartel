@@ -231,3 +231,81 @@ Additional integrations
 Enterprise features
 API marketplace
 Built with ❤️ by the KarapiroCartel Team
+
+# BusinessOS
+
+Production-ready skeleton for a domain-agent Business Operating System with pluggable data connectors, human-in-the-loop, and CLI.
+
+## Quick start
+
+1. Create a virtual environment and install deps:
+
+```bash
+python -m venv .venv && source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+2. Configure environment (copy and edit):
+
+```bash
+cp .env.example .env
+# Edit .env with your endpoints, API keys, and preferences
+```
+
+3. Run detection once:
+
+```bash
+python -m business_os.cli detect
+```
+
+4. Run solve workflow once:
+
+```bash
+python -m business_os.cli run-once
+```
+
+5. Run daemon:
+
+```bash
+python main.py
+```
+
+## Configuration
+
+Environment variables control behavior. Key options:
+
+- LOG_FILE: absolute path for logs (default `/workspace/logs/business_os.log`)
+- ENABLED_DOMAINS: comma-separated domain names (e.g., `DIAGNOSTICS,ECOMMERCE,CUSTOMER_SERVICE,SUPPLY_CHAIN,INVENTORY,PERFORMANCE`)
+- SELF_IMPROVE: `true`/`false`
+- HUMAN_REVIEW_THRESHOLD: e.g., `0.75`
+- SCAN_INTERVAL: seconds between scans (default `300`)
+- SLACK_WEBHOOK_URL: Slack incoming webhook for review notices
+
+Connector endpoints and API keys:
+
+- DIAG_BASE_URL / DIAG_API_KEY
+- ECOMM_BASE_URL / ECOMM_API_KEY
+- CS_BASE_URL / CS_API_KEY
+- SUPPLY_BASE_URL / SUPPLY_API_KEY
+- INV_BASE_URL / INV_API_KEY
+- PERF_BASE_URL / PERF_API_KEY
+
+If a base URL is not set, connectors fall back to safe sample data so you can test end-to-end locally.
+
+## Domains
+
+Start with the prioritized core: Diagnostics, Ecommerce, Customer Service. Additional domains supported: Supply Chain, Inventory, Performance.
+
+## Human-in-the-loop
+
+If a proposed action confidence is below `HUMAN_REVIEW_THRESHOLD` or priority >= 4, the system flags for human review and optionally posts to Slack.
+
+## Security
+
+- No secrets are hardcoded. Use environment vars or your secrets manager.
+- Network calls use simple bearer auth if an API key is provided.
+
+## Development
+
+- Tests: add your tests under `business_os/tests/` and run with `pytest` (not included by default).
+- Logging: rotating file logs at `LOG_FILE`.
